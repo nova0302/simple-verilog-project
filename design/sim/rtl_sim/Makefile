@@ -5,9 +5,10 @@ VLIB =  vlib
 VLOG =  vlog
 VSIM =  vsim
 
-WORK = rtl_work
+WORK = work
 
-VLOG_OPTIONS = -sv -lint -y $(VDIR) +libext+.sv +incdir+$(VDIR) +define+SIMULATION
+VLOG_OPTIONS = -sv -lint -y $(VDIR) +libext+.sv +incdir+$(VDIR) \
+		+define+SIMULATION
 VSIM_OPTIONS = -c -novopt -do "run -all; quit"
 GVSIM_OPTIONS = -novopt -do "add wave *; radix -hex; run -all; quit"
 
@@ -17,8 +18,9 @@ VSRCS =$(wildcard $(VDIR)/*.sv)
 DUT  = led_test
 TB   = $(DUT)_tb
 V=@
+
 all: lib com sim
-sim:
+sim:com
 	$(V)echo " "
 	$(V)echo " -------   Starting Simulation!!!!!  --------------------"
 	$(VSIM) $(VSIM_OPTIONS) $(WORK).$(TB)
@@ -36,10 +38,8 @@ com:
 #	$(VLOG) $(VLOG_OPTIONS) -f vlog.args
 
 lib:
-	$(V)echo " -------   Generate $(WORK) directory if it does not exist!!! ----------"
-	$(V)if [ -d $(WORK) ]; then vdel -lib $(WORK) -all && vlib $(WORK); fi
-	@if [ -d $(WORK) ]; then vdel -lib $(WORK) && vlib $(WORK); fi
-	@if [ ! -d $(WORK) ]; then vlib $(WORK); fi
+	$(V)echo " -------   Generating $(WORK) directory if it does not exist!!! ----------"
+	if [ ! -d $(WORK) ]; then vlib $(WORK); fi
 
 clean:
 	rm -rf $(WORK) transcript *.wlf

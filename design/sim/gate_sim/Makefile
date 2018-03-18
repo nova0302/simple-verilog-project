@@ -1,7 +1,7 @@
 
 QUARTUS_ROOT?= C:/tools/hardware/hdl/intelFPGA_lite/17.0/quartus
-#DEVICE_FAMILY = cycloneive
-DEVICE_FAMILY = maxv
+DEVICE_FAMILY = cycloneive
+#DEVICE_FAMILY = maxv
 
 PROJECT = led_test
 TB = ./../../../rtl/verilog/$(PROJECT)_tb.sv
@@ -16,23 +16,22 @@ VSIM_ARGS = -quiet -t ps +transport_int_delays +transport_path_delays \
  -L 220model_ver \
  -L altera_ver \
  -L altera_mf_ver \
- -L fiftyfivenm_ver \
- -do "run -all"
+ -L fiftyfivenm_ver 
 
 # -L altera_lnsim \
 
-WORK = gate_work
+WORK = work
 
 V?=@
 all: lib com sim
 sim: 
 	$(V)echo " "
 	$(V)echo " -------   Starting Simulation!!!!!  --------------------"
-	$(V)vsim -c $(VSIM_ARGS) $(WORK).$(TB_MODULE)
+	$(V)vsim -c $(VSIM_ARGS) $(WORK).$(TB_MODULE) -do "run -all"
 gsim: 
 	$(V)echo " "
 	$(V)echo " -------   Starting GUI Simulation!!!!!  --------------------"
-	$(V)vsim $(VSIM_ARGS) $(WORK).$(TB_MODULE)
+	$(V)vsim $(VSIM_ARGS) $(WORK).$(TB_MODULE) -do "add wave *;run -all"
 com: $(NET_LIST) 
 	$(V)echo " "
 	$(V)echo " -------   Compiling testbench & netlist !!! ------------"
@@ -45,7 +44,9 @@ lib:
 $(NET_LIST): 
 	$(V)echo " "
 	$(V)echo " ------- Generating netlist if it has'n benn generated yet !!!!! -----------"
-	$(V)make -C ./../../pnr/quartus/ netlist
+	$(V)make -C ./../../pnr/quartus/ clean
+	$(V)make -C ./../../pnr/quartus/ GATE_SIM=1
+	$(V)make -C ./../../pnr/quartus/ netlist 
 clean:
 	$(V)echo " "
 	$(V)echo " ------- Clearing this folder!!!!! ---------"
