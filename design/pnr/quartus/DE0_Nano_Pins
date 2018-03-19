@@ -12,9 +12,12 @@ set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda
 set_global_assignment -name SEARCH_PATH "./../../../rtl/verilog"
 #set_global_assignment -name SEARCH_PATH "./../../../rtl/vhdl"
 
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to clk
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to rst_n
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to led
 set_location_assignment PIN_R8 -to clk
 set_location_assignment PIN_J15 -to rst_n
-set_location_assignment PIN_A15 -to led0
+set_location_assignment PIN_A15 -to led
 
 #set_location_assignment PIN_T10 -to sel[0]
 #set_location_assignment PIN_T13 -to sel[0]
