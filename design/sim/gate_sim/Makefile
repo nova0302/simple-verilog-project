@@ -28,6 +28,9 @@ sim:
 	$(V)echo " "
 	$(V)echo " -------   Starting Simulation!!!!!  --------------------"
 	$(V)vsim -c $(VSIM_ARGS) $(WORK).$(TB_MODULE) -do "run -all"
+	$(V)echo " --   Clearing up files for gate level simulation in ./../../pnr/quartus  --"
+	$(V)make -C ./../../pnr/quartus/ clean
+	ls  ./../../pnr/quartus
 gsim: 
 	$(V)echo " "
 	$(V)echo " -------   Starting GUI Simulation!!!!!  --------------------"
@@ -49,5 +52,5 @@ $(NET_LIST):
 	$(V)make -C ./../../pnr/quartus/ netlist 
 clean:
 	$(V)echo " "
-	$(V)echo " ------- Clearing this folder!!!!! ---------"
+	$(V)echo " ------- Clearing up this folder!!!!! ---------"
 	$(V)rm -rf *.vo *.sdo *.xrf *.sft transcript $(WORK) *.wlf *.csd verilog_libs *.vo *.sdo *.sft *.wlf *.tcl
