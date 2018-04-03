@@ -7,13 +7,12 @@ VSIM =  vsim
 
 WORK = work
 
-VLOG_OPTIONS = -sv -lint -y $(VDIR) +libext+.sv +incdir+$(VDIR) \
-		+define+SIMULATION
+VLOG_OPTIONS = -lint -y $(VDIR) +libext+.v +incdir+$(VDIR)
 VSIM_OPTIONS = -c -novopt -do "run -all; quit"
 GVSIM_OPTIONS = -novopt -do "add wave *; radix -hex; run -all; quit"
 
 VDIR =./../../../rtl/verilog
-VSRCS =$(wildcard $(VDIR)/*.sv)
+VSRCS =$(wildcard $(VDIR)/*.v)
 
 DUT  = led_test
 TB   = $(DUT)_tb
@@ -34,7 +33,7 @@ com:
 	$(VLOG) $(VLOG_OPTIONS) -work $(WORK) $(VSRCS)
 	$(V)echo " "
 	$(V)echo " -------   Compiling testbench !!! ------------"
-	$(VLOG) $(VLOG_OPTIONS) -work $(WORK) $(VDIR)/$(TB).sv
+	$(VLOG) $(VLOG_OPTIONS) -work $(WORK) $(VDIR)/$(TB).v
 #	$(VLOG) $(VLOG_OPTIONS) -f vlog.args
 
 lib:

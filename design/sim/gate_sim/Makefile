@@ -4,12 +4,12 @@ DEVICE_FAMILY = cycloneive
 #DEVICE_FAMILY = maxv
 
 PROJECT = led_test
-TB = ./../../../rtl/verilog/$(PROJECT)_tb.sv
+TB = ./../../../rtl/verilog/$(PROJECT)_tb.v
 TB_MODULE = $(PROJECT)_tb
 
 NET_LIST = $(PROJECT).vo
 
-VLOG_ARGS = -quiet +incdir+./../../../rtl/verilog
+VLOG_ARGS = -quiet +incdir+./../../../rtl/verilog +define+GATE_SIM
 
 VSIM_ARGS = -quiet -t ps +transport_int_delays +transport_path_delays \
  -L $(DEVICE_FAMILY)_ver \

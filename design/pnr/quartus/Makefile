@@ -8,7 +8,7 @@
 PROJECT = led_test
 TOP_LEVEL_ENTITY = led_test
 ASSIGNMENT_FILES = $(PROJECT).qpf $(PROJECT).qsf
-SRCS = ./../../../rtl/verilog/led_test.sv
+SRCS = ./../../../rtl/verilog/led_test.v
 
 ###################################################################
 # Part, Family, Boardfile DE1 or DE2
