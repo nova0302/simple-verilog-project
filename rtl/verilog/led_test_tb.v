@@ -11,8 +11,6 @@ module   led_test_tb;
       clk <= 1'b1;
       forever #(PERIOD/2) clk <= ~clk;
    end
-   always @(posedge clk, negedge rst_n) begin
-   end
 
    initial begin
       repeat(30) @(posedge clk);
@@ -20,7 +18,7 @@ module   led_test_tb;
    end
 
    always @(posedge clk)
-     $monitor("@%0tns count=%h led = %0d",$time, dut.count_r, led);
+     $monitor("@%0tns count=%0h led = %0d",$time, dut.count_r, led);
 
    initial begin
       rst_n = 0;
