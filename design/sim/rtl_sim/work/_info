@@ -1,0 +1,180 @@
+m255
+K4
+z2
+Z0 !s99 nomlopt
+R0
+R0
+!s11f vlog 2021.2 2021.04, Apr 14 2021
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z1 d/media/sf_vmShare/work/fpga_work/simple-verilog-project/design/sim/rtl_sim
+T_opt
+!s110 1677289575
+VU57o<F[A;zV_Y@X:k<03;2
+04 11 4 work led_test_tb fast 0
+=1-000ae431a4f1-63f96867-64e7c-eef
+Z2 !s124 OEM10U2 
+Z3 o-quiet -auto_acc_if_foreign -work work +acc
+Z4 tCvgOpt 0
+n@_opt
+Z5 OL;O;2021.2;73
+R1
+T_opt1
+!s110 1677289850
+Vl3j83GlA5<RhfhVo2[KPf2
+04 6 4 work pll_tb fast 0
+=1-000ae431a4f1-63f9697a-26a3c-f55
+R2
+R3
+R4
+n@_opt1
+R5
+vFPGA
+Z6 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z7 !s110 1677289846
+!i10b 1
+!s100 dnj0n5Tnn]ImcfW4[B62?3
+IQPNfle;90EaF`hN9XmWD_3
+S1
+R1
+w1677288514
+8../../../rtl/verilog/FPGA.sv
+F../../../rtl/verilog/FPGA.sv
+!i122 3
+L0 3 57
+Z8 VDg1SIo80bB@j0V0VzS_@n1
+Z9 OL;L;2021.2;73
+r1
+!s85 0
+31
+Z10 !s108 1677289846.000000
+Z11 !s107 ../../../rtl/verilog/pll_tb.sv|../../../rtl/verilog/pll.sv|../../../rtl/verilog/led_test_tb.sv|../../../rtl/verilog/led_test.sv|../../../rtl/verilog/FPGA.sv|
+Z12 !s90 ../../../rtl/verilog/FPGA.sv|../../../rtl/verilog/led_test.sv|../../../rtl/verilog/led_test_tb.sv|../../../rtl/verilog/pll.sv|../../../rtl/verilog/pll_tb.sv|
+!i113 0
+Z13 o-L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+R4
+n@f@p@g@a
+vled_test
+R6
+R7
+!i10b 1
+!s100 XnDhQ@[9CJaoeaaTGLXXF3
+Ib]Ii[b2G0ChhOGY]`CVgW0
+S1
+R1
+w1677199155
+8../../../rtl/verilog/led_test.sv
+F../../../rtl/verilog/led_test.sv
+!i122 3
+L0 3 39
+R8
+R9
+r1
+!s85 0
+31
+R10
+R11
+R12
+!i113 0
+R13
+R4
+vled_test_tb
+R6
+R7
+!i10b 1
+!s100 6IRc9Fab0m`>mI9<0CLk72
+IR9JNk6_Dj?YAlfE;if6ih0
+S1
+R1
+Z14 w1677199925
+Z15 8../../../rtl/verilog/led_test_tb.sv
+Z16 F../../../rtl/verilog/led_test_tb.sv
+!i122 3
+L0 21 62
+R8
+R9
+r1
+!s85 0
+31
+R10
+R11
+R12
+!i113 0
+R13
+R4
+vpll
+R6
+R7
+!i10b 1
+!s100 Vg^2MT6WXkQcT8Y8Sl=d^3
+I`5N8:IZY]0_51L5f7k:Vf3
+S1
+R1
+w1677289841
+8../../../rtl/verilog/pll.sv
+F../../../rtl/verilog/pll.sv
+!i122 3
+L0 5 25
+R8
+R9
+r1
+!s85 0
+31
+R10
+R11
+R12
+!i113 0
+R13
+R4
+vpll_tb
+R6
+R7
+!i10b 1
+!s100 CMS<_KV0oE3mTnD92]ATz0
+ISJ9z[n=UEhNZmFPA1;NJd2
+S1
+R1
+w1677289502
+8../../../rtl/verilog/pll_tb.sv
+F../../../rtl/verilog/pll_tb.sv
+!i122 3
+L0 3 28
+R8
+R9
+r1
+!s85 0
+31
+R10
+R11
+R12
+!i113 0
+R13
+R4
+4simple
+R6
+R7
+!i10b 1
+!s100 b1EaoV^`PnX1mBHMfPM3_2
+IYU30m>:M;lR1;jW3D`XDJ1
+S1
+R1
+R14
+R15
+R16
+!i122 3
+L0 4 0
+R8
+R9
+r1
+!s85 0
+31
+R10
+R11
+R12
+!i113 0
+R13
+R4

@@ -1,12 +1,7 @@
 
-//`define SIMULATION
 
 module led_test
-`ifdef SIMULATION
-  #(parameter NUM_COUNT = 5)
-`else
    #(parameter NUM_COUNT = 50000000)
-`endif
    (
     input  clk, rst_n,
     output led
@@ -16,7 +11,7 @@ module led_test
 
    assign led = led0_r;
 
-   always_ff @(posedge clk or negedge rst_n)
+   always_ff @(posedge clk, negedge rst_n)
      if(!rst_n)
        count_r <= 0;
      else
@@ -29,7 +24,7 @@ module led_test
        count_n = count_r + 1;
 
 
-   always_ff @(posedge clk or negedge rst_n)
+   always_ff @(posedge clk, negedge rst_n)
      if(!rst_n)
        led0_r <= 0;
      else
