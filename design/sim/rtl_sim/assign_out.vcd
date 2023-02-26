@@ -1,0 +1,94 @@
+$date
+	Mon Feb 27 08:08:21 2023
+$end
+$version
+	Questa Intel Starter FPGA Edition Version 2021.2
+$end
+$timescale
+	1ns
+$end
+
+$scope module always_test $end
+
+$scope module dut $end
+$var wire 1 ! clk $end
+$var wire 1 " rst_n $end
+$var wire 1 # in_val [3] $end
+$var wire 1 $ in_val [2] $end
+$var wire 1 % in_val [1] $end
+$var wire 1 & in_val [0] $end
+$var wire 1 ' out_val [3] $end
+$var wire 1 ( out_val [2] $end
+$var wire 1 ) out_val [1] $end
+$var wire 1 * out_val [0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+$dumpvars
+0*
+0)
+0(
+0'
+0&
+0%
+0$
+0#
+0"
+0!
+$end
+#4
+1!
+#8
+0!
+#12
+1!
+#16
+0!
+1"
+1*
+#20
+1!
+0*
+#24
+0!
+1*
+#28
+1!
+0*
+1&
+1*
+#32
+0!
+#36
+1!
+0&
+1%
+0*
+1)
+#40
+0!
+1*
+0)
+#44
+1!
+0*
+1)
+1&
+1*
+#48
+0!
+0)
+#52
+1!
+1)
+0&
+0%
+1$
+0*
+0)
+1(
+#56
+0!
+1*
+0(

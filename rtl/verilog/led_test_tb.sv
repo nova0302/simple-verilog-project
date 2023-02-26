@@ -34,7 +34,6 @@ module   led_test_tb;
       forever #(PERIOD/2) clk <= ~clk;
    end
 
-
    always @(posedge clk)
      $monitor("@%0tns count=%h led = %0d",$time, dut.count_r, led);
 
@@ -45,6 +44,7 @@ module   led_test_tb;
       repeat (30) @ (posedge clk);
       $finish;
    end
+
 `ifdef GATE_SIM
    led_test  dut(.*);
 `else

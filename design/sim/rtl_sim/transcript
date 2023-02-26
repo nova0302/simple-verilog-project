@@ -1,3 +1,6 @@
+# vsim -c -voptargs="+acc" always_test -do "run -all" 
+# Start time: 08:08:21 on Feb 27,2023
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
 # //  Questa Intel Starter FPGA Edition-64
 # //  Version 2021.2 linux_x86_64 Apr 14 2021
 # //
@@ -12,131 +15,22 @@
 # //  is prohibited from disclosure under the Trade Secrets Act,
 # //  18 U.S.C. Section 1905.
 # //
-# vsim -voptargs="+acc" pll_tb -do "add wave *; run -all" 
-# Start time: 10:51:19 on Feb 25,2023
-# ** Note: (vsim-8009) Loading existing optimized design _opt1
 # Loading sv_std.std
-# Loading work.pll_tb(fast)
-# Loading work.pll(fast)
-# add wave *
-#  run -all
-# @100ns ref_clk=0 
-# @126ns ref_clk=0 
-# @150ns ref_clk=1 
-# @176ns ref_clk=1 
-# @200ns ref_clk=0 
-# @226ns ref_clk=0 
-# @250ns ref_clk=1 
-# @276ns ref_clk=1 
-# @300ns ref_clk=0 
-# @326ns ref_clk=0 
-# @350ns ref_clk=1 
-# @376ns ref_clk=1 
-# @400ns ref_clk=0 
-# @426ns ref_clk=0 
-# @450ns ref_clk=1 
-# @476ns ref_clk=1 
-# @500ns ref_clk=0 
-# @526ns ref_clk=0 
-# @550ns ref_clk=1 
-# @576ns ref_clk=1 
-# @600ns ref_clk=0 
-# @626ns ref_clk=0 
-# @650ns ref_clk=1 
-# @676ns ref_clk=1 
-# @700ns ref_clk=0 
-# @726ns ref_clk=0 
-# @750ns ref_clk=1 
-# @776ns ref_clk=1 
-# @800ns ref_clk=0 
-# @826ns ref_clk=0 
-# @850ns ref_clk=1 
-# @876ns ref_clk=1 
-# @900ns ref_clk=0 
-# @926ns ref_clk=0 
-# @950ns ref_clk=1 
-# @976ns ref_clk=1 
-# @1000ns ref_clk=0 
-# @1026ns ref_clk=0 
-# @1050ns ref_clk=1 
-# @1076ns ref_clk=1 
-# @1100ns ref_clk=0 
-# @1126ns ref_clk=0 
-# @1150ns ref_clk=1 
-# @1176ns ref_clk=1 
-# @1200ns ref_clk=0 
-# @1226ns ref_clk=0 
-# @1250ns ref_clk=1 
-# @1276ns ref_clk=1 
-# @1300ns ref_clk=0 
-# @1326ns ref_clk=0 
-# @1350ns ref_clk=1 
-# @1376ns ref_clk=1 
-# @1400ns ref_clk=0 
-# @1426ns ref_clk=0 
-# @1450ns ref_clk=1 
-# @1476ns ref_clk=1 
-# @1500ns ref_clk=0 
-# @1526ns ref_clk=0 
-# @1550ns ref_clk=1 
-# @1576ns ref_clk=1 
-# @1600ns ref_clk=0 
-# @1626ns ref_clk=0 
-# @1650ns ref_clk=1 
-# @1676ns ref_clk=1 
-# @1700ns ref_clk=0 
-# @1726ns ref_clk=0 
-# @1750ns ref_clk=1 
-# @1776ns ref_clk=1 
-# @1800ns ref_clk=0 
-# @1826ns ref_clk=0 
-# @1850ns ref_clk=1 
-# @1876ns ref_clk=1 
-# @1900ns ref_clk=0 
-# @1926ns ref_clk=0 
-# @1950ns ref_clk=1 
-# @1976ns ref_clk=1 
-# @2000ns ref_clk=0 
-# @2026ns ref_clk=0 
-# @2050ns ref_clk=1 
-# @2076ns ref_clk=1 
-# @2100ns ref_clk=0 
-# @2126ns ref_clk=0 
-# @2150ns ref_clk=1 
-# @2176ns ref_clk=1 
-# @2200ns ref_clk=0 
-# @2226ns ref_clk=0 
-# @2250ns ref_clk=1 
-# @2276ns ref_clk=1 
-# @2300ns ref_clk=0 
-# @2326ns ref_clk=0 
-# @2350ns ref_clk=1 
-# @2376ns ref_clk=1 
-# @2400ns ref_clk=0 
-# @2426ns ref_clk=0 
-# @2450ns ref_clk=1 
-# @2476ns ref_clk=1 
-# @2500ns ref_clk=0 
-# @2526ns ref_clk=0 
-# @2550ns ref_clk=1 
-# @2576ns ref_clk=1 
-# @2600ns ref_clk=0 
-# @2626ns ref_clk=0 
-# @2650ns ref_clk=1 
-# @2676ns ref_clk=1 
-# @2700ns ref_clk=0 
-# @2726ns ref_clk=0 
-# @2750ns ref_clk=1 
-# @2776ns ref_clk=1 
-# @2800ns ref_clk=0 
-# @2826ns ref_clk=0 
-# @2850ns ref_clk=1 
-# @2876ns ref_clk=1 
-# @2900ns ref_clk=0 
-# @2926ns ref_clk=0 
-# ** Note: $stop    : ../../../rtl/verilog/pll_tb.sv(24)
-#    Time: 2950 ns  Iteration: 1  Instance: /pll_tb
-# Break in Module pll_tb at ../../../rtl/verilog/pll_tb.sv line 24
-exit
-# End time: 10:51:36 on Feb 25,2023, Elapsed time: 0:00:17
+# Loading work.always_test(fast)
+# Loading work.test(fast)
+# run -all
+# @    0ns 0000
+# @   16ns 0001
+# @   20ns 0000
+# @   24ns 0001
+# @   28ns 0001
+# @   36ns 0010
+# @   40ns 0001
+# @   44ns 0011
+# @   48ns 0001
+# @   52ns 0100
+# @   56ns 0001
+# ** Note: $finish    : ../../../rtl/verilog/alway_test.sv(56)
+#    Time: 60 ns  Iteration: 0  Instance: /always_test
+# End time: 08:08:21 on Feb 27,2023, Elapsed time: 0:00:00
 # Errors: 0, Warnings: 0
