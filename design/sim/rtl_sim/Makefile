@@ -11,13 +11,34 @@ NOVPOT=-novopt
 VLOG_OPTIONS = -lint -y $(VDIR) +libext+.v +incdir+$(VDIR)
 VSIM_OPTIONS = -c -voptargs=+acc $(TB) -do "run -all; quit"
 #GVSIM_OPTIONS =  -voptargs=+acc $(TB) -do "add wave *; radix -hex; run -all; quit"
-GVSIM_OPTIONS =  -voptargs=+acc $(TB) -do "add wave *; run 1ms; quit"
+WAVE=wave_fpga.do
+#GVSIM_OPTIONS =  -voptargs=+acc $(TB) -do "do $(WAVE); run 1ms"
+GVSIM_OPTIONS =  -voptargs=+acc $(TB) -do "add wave *; run 1ms"
 
 VDIR =./../../../rtl/verilog
 VSRCS =$(wildcard $(VDIR)/*.sv)
+VSRCS +=$(wildcard $(VDIR)/uart/*.v)
+VSRCS +=$(wildcard $(VDIR)/spi/*.v)
 
-DUT  = led_test
-TB   = $(DUT)_tb
+#DUT  = led_test
+#TB   = $(DUT)_tb
+
+#DUT=FPGA
+#TB=$(DUT)
+
+#DUT=Uart8Transmitter
+#TB=$(DUT)_tb
+
+#DUT=Uart8Receiver
+#TB=$(DUT)_tb
+
+#DUT=SPI_MasSlv
+#TB=$(DUT)_tb
+
+DUT=pick
+TB=$(DUT)_tb
+
+
 V=@
 
 all: lib com sim
@@ -37,7 +58,7 @@ com:
 	$(VLOG) $(VLOG_OPTIONS) -work $(WORK) $(VSRCS)
 	$(V)echo " "
 	$(V)echo " -------   Compiling testbench !!! ------------"
-	$(VLOG) $(VLOG_OPTIONS) -work $(WORK) $(VDIR)/$(TB).sv
+#	$(VLOG) $(VLOG_OPTIONS) -work $(WORK) $(VDIR)/$(TB).sv
 #	$(VLOG) $(VLOG_OPTIONS) -f vlog.args
 
 lib:
