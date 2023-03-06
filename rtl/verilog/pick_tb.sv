@@ -4,8 +4,9 @@ module pick_tb;
    timeunit 1ns;
    timeprecision 1ns;
 
-   bit CLK = 1'b0;
-   bit nRST = 1'b0;
+   bit CLK      = 1'b0;
+   bit nRST     = 1'b0;
+   bit rcvReady = 1'b1;
    logic [15:0]	DIN;
    wire		PIXEL_VALID;
    wire [15:0]	PIXEL_DATA;
