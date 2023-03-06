@@ -22,6 +22,9 @@ module FPGA_TOP
    //localparam V_BACK_PORCH = V_PXL_MAX/10;
    localparam V_BACK_PORCH = 0;
 
+   int hd;
+   int vd;
+
    bit    CLI = 1'b0;
    always #(PERIOD/2) CLI = ~CLI;
 
@@ -40,7 +43,6 @@ module FPGA_TOP
    always@(posedge CLI)
      $monitor("@%0tns hd=%0d, vd=%0d HD:%b VD:%d", $time, hd, vd, HD, VD);
 
-   int hd;
    always_ff @(posedge CLI, negedge rst_n)begin
      if(!rst_n)
        hd <= 0;
@@ -53,7 +55,6 @@ module FPGA_TOP
 
    assign HD = (hd > H_BACK_PORCH);
 
-   int vd;
    always_ff @(posedge CLI, negedge rst_n) begin
       if(!rst_n)
 	vd <= 0;

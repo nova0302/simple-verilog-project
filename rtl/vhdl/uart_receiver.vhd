@@ -1,18 +1,18 @@
 -------------------------------------------------------------------------------
 -- Title      : simplified uart receiver
--- Project    : 
+-- Project    :
 -------------------------------------------------------------------------------
 -- File       : uart_receiver.vhd
 -- Author     :   <user@DESKTOP-4QS12VJ>
--- Company    : 
+-- Company    :
 -- Created    : 2018-10-11
--- Last update: 2018-10-14
--- Platform   : 
+-- Last update: 2023-03-06
+-- Platform   :
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
--- Description: 
+-- Description:
 -------------------------------------------------------------------------------
--- Copyright (c) 2018 
+-- Copyright (c) 2018
 -------------------------------------------------------------------------------
 -- Revisions  :
 -- Date        Version  Author  Description

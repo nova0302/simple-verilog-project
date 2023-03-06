@@ -1,139 +1,158 @@
 
-module FPGA
-  (
-   output serialOut
-
-   );
-
+module FPGA (output serialOut);
    timeunit 1ns;
    timeprecision 1ns;
 
-   localparam ADDI_T  = 100;
-   localparam UART_T  = 10;
-   localparam FIFO_DEPTH  = 4;
-   localparam FIFO_DATA_WIDTH = 16;
+   localparam numChannel       = 4;
+   localparam numPixel         = 16;
+   localparam pixelWidth       = 16;
+   localparam ADDI_T           = 100;
+   localparam UART_T           = 10;
+   localparam FIFO_DEPTH       = 4;
+   localparam FIFO_DATA_WIDTH  = 16;
 
-   wire [FIFO_DATA_WIDTH-1:0] fifoOut;
-   bit                        addi_clk   = 1'b0;
-   bit                        nRST = 1'b0;
-   bit                        GO    = 1'b0;
-   wire                       PUSH;
-   wire [15:0]                PIXEL_DATA;
-   wire                       full, empty;
-   logic [15:0]               DIN;
+   wire [numChannel-1:0] [FIFO_DATA_WIDTH-1:0] fifoOut;
+   bit                                         nRST = 1'b0;
+   //wire                     PIXEL_VALID;
+   wire [numChannel-1:0]                       PIXEL_VALID;
+   //wire [15:0]              PIXEL_DATA;
+   wire [numChannel-1:0][15:0]                 PIXEL_DATA;
+   wire [numChannel-1:0]                       full;
+   wire [numChannel-1:0]                       empty;
+   logic [15:0]                                DIN;
 
-   logic [4:0]                index = 0;
-   logic [0:31]               fifo[15:0];
+   logic                                       rd;
 
-   bit                        uart_clk = 1'b0;
-   bit                        rd = 1'b0;
+   bit                                         uart_clk = 1'b0;
+   int                                         uart_skew = {$random} % 10;
+   initial #1 #(uart_skew) forever #(UART_T/2) uart_clk = ~uart_clk;
 
-   always #(UART_T/2) uart_clk = ~uart_clk; // 1 / (115200 * 16) = 1 / 1843200
-   always #(ADDI_T/2) addi_clk = ~addi_clk;
+   bit                                         addi_clk   = 1'b0;
+   int                                         addi_skew = {$random} % 30;
+   initial #1 #(addi_skew) forever #(ADDI_T/2) addi_clk = ~addi_clk;
 
-   always@(posedge addi_clk, negedge nRST) begin
-      if(!nRST)begin
-         index <= 0;
+   task t_sync;
+      begin
+         repeat (2) begin
+            @(posedge addi_clk);
+            DIN <= 16'hFFFF;
+         end
+         @(posedge addi_clk);
+         DIN <= 16'hAAAA;
+         @(posedge addi_clk);
+         DIN <= 16'hCCCC;
       end
-      else begin
-         if(PUSH)begin
-            fifo[index] <= PIXEL_DATA;
-            index = index + 1;
+   endtask // t_sync
+
+   task t_packet;
+      begin
+         //      while(!nRST);
+         DIN <= 16'h0;
+         t_sync;
+         repeat (16)  begin
+            @(posedge addi_clk);
+            DIN <= DIN + 1;
          end
       end
-   end
+   endtask // t_packet
 
-   task init_seq;
-      repeat (2) begin
-         @(posedge addi_clk);
-         DIN <= 16'hFFFF;
-      end
-      @(posedge addi_clk);
-      DIN <= 16'hAAAA;
-   endtask // init_seq
-
-   task t_go;
-      while(!nRST);
-      repeat (4) @(posedge addi_clk);
-      GO  <= 1'b1;
-      DIN <= 16'h0;
-      init_seq;
-      repeat (16)  begin
-         @(posedge addi_clk);
-         DIN <= DIN + 1;
-      end
-      repeat (4) @(posedge addi_clk);
-   endtask // t_go
-
-
-   initial begin
-      repeat (3) begin
-         t_go;
-         repeat (100) @(posedge addi_clk);
-         t_go;
-         repeat (100) @(posedge addi_clk);
-      end
-   end
-
-   initial begin
+   initial begin: main_stimulus
       repeat (3) @(posedge addi_clk);
       nRST <= 1'b1;
-      repeat (300) @(posedge addi_clk);
+      repeat (1) @(posedge addi_clk);
+      repeat (2) begin
+         t_packet;
+         repeat (700) @(posedge addi_clk);
+      end
       $finish;
    end
 
-   pick #(5)
-   pick0
-     (
-      .CLK        (addi_clk       )
-      ,.nRST      (nRST     )
-      ,.GO        (GO        )
-      ,.DIN       (DIN       )
-      ,.PUSH      (PUSH      )
-      ,.PIXEL_DATA(PIXEL_DATA));
+   genvar i;
 
-   fifo_async_top #(FIFO_DEPTH, FIFO_DATA_WIDTH)
-   fifo_async_top0
-     (
-      .clkw    (addi_clk   )
-      ,.resetw (~nRST      )
-      ,.wr     (PUSH       )
-      ,.full   (full       )
-      ,.fifoIn (PIXEL_DATA )
+   generate
+      for(i=0; i < numChannel; i++) begin: pick_fifo_gen
 
-      ,.clkr (uart_clk )
-      ,.resetr   (~nRST    )
-      ,.rd       (rd       )
-      ,.empty    (empty    )
-      ,.fifoOut  (fifoOut  ));
+         pick #(.pixelWidth(pixelWidth))
+         pick0
+            (
+             .CLK          (addi_clk      )
+             ,.nRST        (nRST          )
+             ,.DIN         (DIN           )
+             ,.PIXEL_VALID (PIXEL_VALID[i])
+             ,.PIXEL_DATA  (PIXEL_DATA[i]));
 
-   enum   {eLdXmtDataReg, eByteReady, eTByte, eTxDone}currState, nextState;
+         fifo_async_top #(FIFO_DEPTH, FIFO_DATA_WIDTH)
+         fifo_async_top0
+           (
+            .clkw     (addi_clk      )
+            ,.resetw  (~nRST         )
+            ,.wr      (PIXEL_VALID[i])
+            ,.full    ()
+            ,.fifoIn  (PIXEL_DATA[i] )
+
+            ,.clkr    (uart_clk      )
+            ,.resetr  (~nRST         )
+            ,.rd      (rd            )
+            ,.empty   (empty[i]      )
+            ,.fifoOut (fifoOut[i]  ));
+      end // for (i=0; i<4; i++)
+   endgenerate
+
+   enum   {eIdle, eLdFifoOut, eLdXmtDataReg, eByteReady, eTByte, eTxDone}currState, nextState;
    bit    byteReady, ldXmtDataReg, tByte, txDone;
-   always_ff@(posedge uart_clk, negedge nRST)begin
+   always_ff@(posedge uart_clk, negedge nRST) begin:nextStateReg
       if(!nRST)
-        currState  <= eLdXmtDataReg;
+        currState  <= eIdle;
       else
         currState <= nextState;
    end
 
-   bit selMsb = 1'b0;
-   bit selMsbNext;
-   always_ff@(posedge uart_clk, negedge nRST)
-     if(!nRST)
-       selMsb <= 1'b1;
-     else
-       selMsb <= selMsbNext;
+   int channelCounter;
+   int channelCounterNext;
+   always_ff@(posedge uart_clk, negedge nRST) begin:channelCounterReg
+      if(!nRST)
+        channelCounter <= 0;
+      else
+        channelCounter <= channelCounterNext;
+   end
 
-   always_comb begin
+   logic ldDataBus;
+   logic [numChannel*2-1:0][FIFO_DATA_WIDTH/2-1:0] fifoOutVector;
+   genvar                                          l;
+   generate
+      for(l=0; l < numChannel; l++) begin
+         always_ff@(posedge uart_clk)begin
+            if(ldDataBus)begin
+               fifoOutVector[2*l+1]   <= fifoOut[l][15:8];
+               fifoOutVector[2*l]     <= fifoOut[l][7:0];
+            end
+         end
+      end
+   endgenerate
+
+   always_comb begin:nextStateCom
       {ldXmtDataReg, byteReady, tByte, rd} = 4'b0000; // default value
       nextState = currState; //default state
-      selMsbNext = selMsb;
+      channelCounterNext = channelCounter;
+      ldDataBus = 1'b0;
       unique case(currState)
-        eLdXmtDataReg:
-          if(!empty)begin
-             {ldXmtDataReg, byteReady, tByte, rd} = 4'b1001;
-             nextState = eByteReady;
-          end
+        eIdle:begin
+           channelCounterNext = 0;
+           if(!empty[0])begin
+              {ldXmtDataReg, byteReady, tByte, rd} = 4'b0001;
+              nextState = eLdFifoOut;
+           end
+        end
+
+        eLdFifoOut:begin
+           ldDataBus = 1'b1;
+           nextState = eLdXmtDataReg;
+        end
+
+        eLdXmtDataReg:begin
+           {ldXmtDataReg, byteReady, tByte, rd} = 4'b1000;
+           nextState = eByteReady;
+        end
         eByteReady:begin
            {ldXmtDataReg, byteReady, tByte, rd} = 4'b0100;
            nextState = eTByte;
@@ -144,18 +163,23 @@ module FPGA
         end
         eTxDone:begin
            if(txDone)begin
-              nextState = eLdXmtDataReg;
-              selMsbNext = ~selMsb;
+              if(channelCounter < numChannel*2-1) begin
+                 channelCounterNext = channelCounter + 1;
+                 nextState = eLdXmtDataReg;
+              end
+              else begin
+                 nextState = eIdle;
+              end
            end
         end
       endcase // unique case (currState)
    end // always_comb
-   wire[7:0] dataBus = (selMsb) ? fifoOut[15:8] : fifoOut[7:0];
+   wire[7:0] dataBus = fifoOutVector[channelCounter];
 
    uart_transmitter #(4,8)
    uart_transmitter0
      (
-      .clk          (uart_clk         )
+      .clk          (uart_clk    )
       ,.nRST        (nRST        )
       ,.serialOut   (serialOut   )
       ,.dataBus     (dataBus     )
