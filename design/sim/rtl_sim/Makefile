@@ -35,8 +35,8 @@ VSRCS +=$(wildcard $(VDIR)/spi/*.v)
 #DUT=SPI_MasSlv
 #TB=$(DUT)_tb
 
-DUT=pick
-TB=$(DUT)_tb
+DUT=FPGA
+TB=$(DUT)
 
 
 V=@

@@ -39,6 +39,8 @@
 //// from http://www.opencores.org/lgpl.shtml                               ////
 ////                                                                        ////
 ////////////////////////////////////////////////////////////////////////////////
+//
+`define ORIGIN
 
 `timescale 1ns/10ps
 module SPI_MasSlv_tb;

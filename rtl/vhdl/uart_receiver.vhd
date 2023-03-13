@@ -6,7 +6,7 @@
 -- Author     :   <user@DESKTOP-4QS12VJ>
 -- Company    :
 -- Created    : 2018-10-11
--- Last update: 2023-03-06
+-- Last update: 2023-03-10
 -- Platform   :
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -27,7 +27,8 @@ use ieee.numeric_std.all;
 entity uart_receiver is
   generic (DVSR : natural := 52);
   port (
-    clk, reset   : in  std_logic;
+    clk          : in  std_logic;
+    reset        : in  std_logic;
     rx           : in  std_logic;
     ready        : out std_logic;
     rcvDataValid : out std_logic;
@@ -85,14 +86,14 @@ begin  -- architecture str
     sNext        <= sReg;
     nNext        <= nReg;
     bNext        <= bReg;
-    ready        <= '0';
+    ready        <= '1';
     rcvDataValid <= '0';
     case regState is
       when IDLE =>
         if rx = '0' then
           nState <= START;
         end if;
-        ready <= '1';
+        ready <= '0';
       when START =>
         if sPulse = '1' then
           if sReg = 7 then
