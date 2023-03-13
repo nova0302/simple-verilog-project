@@ -1,4 +1,5 @@
 design/sim/rtl_sim/transcript
 design/sim/rtl_sim/work/
-design/sim/rtl_sim/assign_out.wlf
+design/sim/rtl_sim/*.wlf
 design/sim/rtl_sim/transcript
+design/sim/rtl_sim/dump.vcd
