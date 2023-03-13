@@ -164,6 +164,7 @@ module FPGA (output serialOut);
 	      nextState = eLdFifoOut;
 	   end
 	end
+
 	eLdFifoOut:begin
 	   ldFifoOut2Vector = 1'b1;
 	   nextState = eLdXmtDataReg;
@@ -173,14 +174,17 @@ module FPGA (output serialOut);
 	   {ldXmtDataReg, byteReady, tByte, rd} = 4'b1000;
 	   nextState = eByteReady;
 	end
+
 	eByteReady:begin
 	   {ldXmtDataReg, byteReady, tByte, rd} = 4'b0100;
 	   nextState = eTByte;
 	end
+
 	eTByte:begin
 	   {ldXmtDataReg, byteReady, tByte, rd} = 4'b0010;
 	   nextState = eTxDone;
 	end
+
 	eTxDone:begin
 	   if(txDone)begin
 	      if(channelCounter < numChannel*2-1) begin
@@ -197,6 +201,7 @@ module FPGA (output serialOut);
 	      end
 	   end
 	end
+
       endcase // unique case (currState)
    end // always_comb
    wire[7:0] dataBus = fifoOutVector[channelCounter];

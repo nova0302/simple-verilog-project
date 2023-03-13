@@ -31,29 +31,23 @@ module pick
    end
 
    always_comb begin
-
-      nextState = currState;
+      nextState = eFFFF0; //default state
       pixel_cnt_next = pixel_cnt;
 
       unique case(currState)
 	eFFFF0: begin
-	   if(rcvReady)
-	     if(DIN == 16'hFFFF)
+	   if(rcvReady && DIN == 16'hFFFF)
 	       nextState  = eFFFF1;
 	end
 
 	eFFFF1: begin
 	   if(DIN == 16'hFFFF)
 	     nextState  = eAAAA;
-	   else
-	     nextState  = eFFFF0;
 	end
 
 	eAAAA: begin
 	   if(DIN == 16'hAAAA)
 	     nextState  = eCNTL;
-	   else
-	     nextState  = eFFFF0;
 	end
 
 	eCNTL:  begin
@@ -65,6 +59,8 @@ module pick
 	   pixel_cnt_next = pixel_cnt + 1;
 	   if(pixel_cnt > numPixel - 1)
 	     nextState = eFFFF0;
+	   else
+	     nextState = ePIXEL_DATA;
 	end
       endcase // unique case (currState)
    end
