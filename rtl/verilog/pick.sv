@@ -2,7 +2,7 @@
 module pick
   #(parameter pixelWidth = 16)
    (
-    input CLK
+    input CLK // from selectIO
     ,input nRST
     ,input go
     ,input wire[pixelWidth-1:0] DIN

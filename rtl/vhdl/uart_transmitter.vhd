@@ -6,7 +6,7 @@
 -- Author     :   <user@DESKTOP-4QS12VJ>
 -- Company    :
 -- Created    : 2018-10-11
--- Last update: 2023-03-02
+-- Last update: 2023-03-15
 -- Platform   :
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -52,7 +52,8 @@ architecture str of uart_transmitter is
   signal shift                 : std_logic;  -- causes shift of data in xmtShiftreg
   signal start                 : std_logic;  -- signals start of transmission
   signal sPulse                : std_logic;  -- signals start of transmission
-  signal clk16_reg, clk16_next : unsigned(5 downto 0);
+  --signal clk16_reg, clk16_next : unsigned(5 downto 0);
+  signal clk16_reg, clk16_next : unsigned(7 downto 0);
 
 begin  -- architecture str
 

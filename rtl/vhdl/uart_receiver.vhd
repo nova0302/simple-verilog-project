@@ -6,7 +6,7 @@
 -- Author     :   <user@DESKTOP-4QS12VJ>
 -- Company    :
 -- Created    : 2018-10-11
--- Last update: 2023-03-14
+-- Last update: 2023-03-15
 -- Platform   :
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -40,7 +40,8 @@ end entity uart_receiver;
 architecture str of uart_receiver is
   type state_t is (IDLE, START, DATA, STOPs);
   signal regState, nState      : state_t;
-  signal clk16_reg, clk16_next : unsigned(5 downto 0);
+  --signal clk16_reg, clk16_next : unsigned(5 downto 0);
+  signal clk16_reg, clk16_next : unsigned(7 downto 0);
   signal sReg, sNext           : unsigned(3 downto 0);
   signal nReg, nNext           : unsigned(2 downto 0);
   signal bReg, bNext           : std_logic_vector(7 downto 0);  -- rx buf register
