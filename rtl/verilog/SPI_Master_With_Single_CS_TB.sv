@@ -6,7 +6,11 @@
 
 module SPI_Master_With_Single_CS_TB ();
 
+   timeunit 1ns;
+   timeprecision 100ps;
+
    parameter SPI_MODE = 3;           // CPOL = 1, CPHA = 1
+   parameter LSB_FIRST = 1;           // CPOL = 1, CPHA = 1
    parameter CLKS_PER_HALF_BIT = 4;  // 6.25 MHz
    parameter MAIN_CLK_DELAY = 2;     // 25 MHz
    //parameter MAX_BYTES_PER_CS = 2;   // 2 bytes per chip select
@@ -35,10 +39,11 @@ module SPI_Master_With_Single_CS_TB ();
 
    // Instantiate UUT
    SPI_Master_With_Single_CS
-     #(.SPI_MODE(SPI_MODE),
-       .CLKS_PER_HALF_BIT(CLKS_PER_HALF_BIT),
-       .MAX_BYTES_PER_CS(MAX_BYTES_PER_CS),
-       .CS_INACTIVE_CLKS(CS_INACTIVE_CLKS))
+     #(.SPI_MODE          (SPI_MODE),
+       .LSB_FIRST         (LSB_FIRST),
+       .CLKS_PER_HALF_BIT (CLKS_PER_HALF_BIT),
+       .MAX_BYTES_PER_CS  (MAX_BYTES_PER_CS),
+       .CS_INACTIVE_CLKS  (CS_INACTIVE_CLKS))
    UUT
      (
       // Control/Data Signals,
@@ -66,6 +71,7 @@ module SPI_Master_With_Single_CS_TB ();
 
    // Sends a single byte from master.  Will drive CS on its own.
    task SendSingleByte(input [7:0] data);
+      begin
       @(posedge r_Clk);
       r_Master_TX_Byte <= data;
       r_Master_TX_DV   <= 1'b1;
@@ -73,6 +79,7 @@ module SPI_Master_With_Single_CS_TB ();
       r_Master_TX_DV <= 1'b0;
       @(posedge r_Clk);
       @(posedge w_Master_TX_Ready);
+      end
    endtask // SendSingleByte
 
 

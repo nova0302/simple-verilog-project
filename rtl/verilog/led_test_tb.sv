@@ -57,25 +57,25 @@ module   led_test_tb;
    task do_write;
       input [7:0] i_addr, i_data;
       begin
-	 // demonstrates driving external Global Reg
-	 r_Addr_Valid    = 1'b1;
-	 r_Mux_Addr_Data = i_addr;
-	 #10;
-	 r_Addr_Valid    = 1'b0;
-	 r_Data_Valid    = 1'b1;
-	 r_Mux_Addr_Data = i_data;
-	 #10;
-	 r_Data_Valid = 1'b0;
-	 #10;
+         // demonstrates driving external Global Reg
+         r_Addr_Valid    = 1'b1;
+         r_Mux_Addr_Data = i_addr;
+         #10;
+         r_Addr_Valid    = 1'b0;
+         r_Data_Valid    = 1'b1;
+         r_Mux_Addr_Data = i_data;
+         #10;
+         r_Data_Valid = 1'b0;
+         #10;
       end
    endtask
 
    initial
      begin
-	#10;
-	do_write(8'h00, 8'hAB);
-	do_write(8'h01, 8'hBC);
-	do_write(8'h02, 8'hCD);
+        #10;
+        do_write(8'h00, 8'hAB);
+        do_write(8'h01, 8'hBC);
+        do_write(8'h02, 8'hCD);
      end
 
 endmodule // led_test_tb

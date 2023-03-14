@@ -32,6 +32,7 @@
 
 module SPI_Master
   #(parameter SPI_MODE = 0,
+    parameter LSB_FIRST = 1,
     parameter CLKS_PER_HALF_BIT = 2)
   (
    // Control/Data Signals,
@@ -166,74 +167,83 @@ module SPI_Master
     if (~i_Rst_L)
     begin
       o_SPI_MOSI     <= 1'b0;
-      r_TX_Bit_Count <= 3'b111; // send MSb first
+      //r_TX_Bit_Count <= 3'b111; // send MSb first
+       r_TX_Bit_Count <= (LSB_FIRST) ? 3'h0 : 3'h7;
     end
     else
     begin
       // If ready is high, reset bit counts to default
       if (o_TX_Ready)
       begin
-        r_TX_Bit_Count <= 3'b111;
+        //r_TX_Bit_Count <= 3'b111;
+       r_TX_Bit_Count <= (LSB_FIRST) ? 3'h0 : 3'h7;
       end
       // Catch the case where we start transaction and CPHA = 0
       else if (r_TX_DV & ~w_CPHA)
       begin
-        o_SPI_MOSI     <= r_TX_Byte[3'b111];
-        r_TX_Bit_Count <= 3'b110;
+        //o_SPI_MOSI     <= r_TX_Byte[3'b111];
+        o_SPI_MOSI     <= (LSB_FIRST) ? r_TX_Byte[3'b000] : r_TX_Byte[3'b111];
+        //r_TX_Bit_Count <= 3'b110;
+        r_TX_Bit_Count <= (LSB_FIRST) ? 3'b001 : 3'b110;
       end
       else if ((r_Leading_Edge & w_CPHA) | (r_Trailing_Edge & ~w_CPHA))
       begin
-        r_TX_Bit_Count <= r_TX_Bit_Count - 1'b1;
+        //r_TX_Bit_Count <= r_TX_Bit_Count - 1'b1;
+        r_TX_Bit_Count <= (LSB_FIRST) ? r_TX_Bit_Count + 1'b1 : r_TX_Bit_Count - 1'b1;
         o_SPI_MOSI     <= r_TX_Byte[r_TX_Bit_Count];
       end
     end
   end
 
 
-  // Purpose: Read in MISO data.
-  always @(posedge i_Clk or negedge i_Rst_L)
-  begin
-    if (~i_Rst_L)
-    begin
-      o_RX_Byte      <= 8'h00;
-      o_RX_DV        <= 1'b0;
-      r_RX_Bit_Count <= 3'b111;
-    end
-    else
-    begin
+   // Purpose: Read in MISO data.
+   always @(posedge i_Clk or negedge i_Rst_L) begin
+        if (~i_Rst_L) begin
+             o_RX_Byte      <= 8'h00;
+             o_RX_DV        <= 1'b0;
+             //r_RX_Bit_Count <= 3'b111;
+             r_RX_Bit_Count <= (LSB_FIRST) ? 3'b000 : 3'b111;
+          end
+        else begin
 
-      // Default Assignments
-      o_RX_DV   <= 1'b0;
+             // Default Assignments
+             o_RX_DV   <= 1'b0;
 
-      if (o_TX_Ready) // Check if ready is high, if so reset bit count to default
-      begin
-        r_RX_Bit_Count <= 3'b111;
-      end
-      else if ((r_Leading_Edge & ~w_CPHA) | (r_Trailing_Edge & w_CPHA))
-      begin
-        o_RX_Byte[r_RX_Bit_Count] <= i_SPI_MISO;  // Sample data
-        r_RX_Bit_Count            <= r_RX_Bit_Count - 1'b1;
-        if (r_RX_Bit_Count == 3'b000)
-        begin
-          o_RX_DV   <= 1'b1;   // Byte done, pulse Data Valid
-        end
-      end
-    end
-  end
+             if (o_TX_Ready) // Check if ready is high, if so reset bit count to default
+               begin
+                  //r_RX_Bit_Count <= 3'b111;
+                  r_RX_Bit_Count <= (LSB_FIRST) ? 3'b000 : 3'b111;
+               end
+             else if ((r_Leading_Edge & ~w_CPHA) | (r_Trailing_Edge & w_CPHA))
+               begin
+                  o_RX_Byte[r_RX_Bit_Count] <= i_SPI_MISO;  // Sample data
+                  //r_RX_Bit_Count            <= r_RX_Bit_Count - 1'b1;
+                  r_RX_Bit_Count            <= (LSB_FIRST) ? r_RX_Bit_Count + 1'b1 : r_RX_Bit_Count - 1'b1;
+                  if(LSB_FIRST)begin
+                     if (r_RX_Bit_Count == 3'b111)
+                       o_RX_DV   <= 1'b1;   // Byte done, pulse Data Valid
+                  end
+                  else begin
+                     if (r_RX_Bit_Count == 3'b000)
+                       o_RX_DV   <= 1'b1;   // Byte done, pulse Data Valid
+                  end
+               end
+          end
+     end
 
 
-  // Purpose: Add clock delay to signals for alignment.
-  always @(posedge i_Clk or negedge i_Rst_L)
-  begin
-    if (~i_Rst_L)
-    begin
-      o_SPI_Clk  <= w_CPOL;
-    end
-    else
-      begin
-        o_SPI_Clk <= r_SPI_Clk;
-      end // else: !if(~i_Rst_L)
-  end // always @ (posedge i_Clk or negedge i_Rst_L)
+   // Purpose: Add clock delay to signals for alignment.
+   always @(posedge i_Clk or negedge i_Rst_L)
+     begin
+        if (~i_Rst_L)
+          begin
+             o_SPI_Clk  <= w_CPOL;
+          end
+        else
+          begin
+             o_SPI_Clk <= r_SPI_Clk;
+          end // else: !if(~i_Rst_L)
+     end // always @ (posedge i_Clk or negedge i_Rst_L)
 
 
 endmodule // SPI_Master

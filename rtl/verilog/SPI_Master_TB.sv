@@ -6,6 +6,7 @@
 module SPI_Master_TB ();
 
    parameter SPI_MODE = 3; // CPOL = 1, CPHA = 1
+   parameter LSB_FIRST = 1;
    parameter CLKS_PER_HALF_BIT = 4;  // 6.25 MHz
    parameter MAIN_CLK_DELAY = 2;  // 25 MHz
 
@@ -26,8 +27,9 @@ module SPI_Master_TB ();
 
    // Instantiate UUT
    SPI_Master
-     #(.SPI_MODE(SPI_MODE),
-       .CLKS_PER_HALF_BIT(CLKS_PER_HALF_BIT))
+     #(.SPI_MODE(SPI_MODE)
+       ,.LSB_FIRST(LSB_FIRST)
+       ,.CLKS_PER_HALF_BIT(CLKS_PER_HALF_BIT))
    SPI_Master_UUT
      (
       // Control/Data Signals,
@@ -52,12 +54,14 @@ module SPI_Master_TB ();
 
    // Sends a single byte from master.
    task SendSingleByte(input [7:0] data);
-      @(posedge r_Clk);
-      r_Master_TX_Byte <= data;
-      r_Master_TX_DV   <= 1'b1;
-      @(posedge r_Clk);
-      r_Master_TX_DV <= 1'b0;
-      @(posedge w_Master_TX_Ready);
+      begin
+         @(posedge r_Clk);
+         r_Master_TX_Byte <= data;
+         r_Master_TX_DV   <= 1'b1;
+         @(posedge r_Clk);
+         r_Master_TX_DV <= 1'b0;
+         @(posedge w_Master_TX_Ready);
+      end
    endtask // SendSingleByte
 
 
@@ -77,9 +81,10 @@ module SPI_Master_TB ();
         $display("Sent out 0xC1, Received 0x%X", r_Master_RX_Byte);
 
         // Test double byte
-        SendSingleByte(8'hBE);
+        //SendSingleByte(8'hBE);
+        SendSingleByte(8'hB1);
         $display("Sent out 0xBE, Received 0x%X", r_Master_RX_Byte);
-        SendSingleByte(8'hEF);
+        SendSingleByte(8'hE2);
         $display("Sent out 0xEF, Received 0x%X", r_Master_RX_Byte);
         repeat(10) @(posedge r_Clk);
         $finish();

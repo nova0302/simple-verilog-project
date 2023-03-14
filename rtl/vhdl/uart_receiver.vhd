@@ -6,7 +6,7 @@
 -- Author     :   <user@DESKTOP-4QS12VJ>
 -- Company    :
 -- Created    : 2018-10-11
--- Last update: 2023-03-10
+-- Last update: 2023-03-14
 -- Platform   :
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -23,9 +23,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 -------------------------------------------------------------------------------
--- in case, where clk : 1Mhz, baud: 1200(1000000/(16*1200) = 52)
+-- in case, where clk :  1Mhz, baud:   1200 ( 1000000/(16*  1200) = 52)
+-- in case, where clk : 40Mhz, baud: 115200 (40000000/(16*115200) = 22)
 entity uart_receiver is
-  generic (DVSR : natural := 52);
+  generic (DVSR : natural := 22);
   port (
     clk          : in  std_logic;
     reset        : in  std_logic;
@@ -46,21 +47,21 @@ architecture str of uart_receiver is
   signal sPulse                : std_logic;
 begin  -- architecture str
 
---  -- purpose: free running mod-52 counter, independent of FSMD
---  mod_52_counter : process (clk, reset) is
---  begin  -- process mod_52_counter
---    if reset = '1' then                 -- asynchronous reset (active low)
---      clk16_reg <= (others => '0');
---    elsif clk'event and clk = '1' then  -- rising clock edge
---      clk16_reg <= clk16_next;
---    end if;
---  end process mod_52_counter;
---
---  -- next-state / output logic
---  clk16_next <= (others => '0') when clk16_reg = (DVSR-1) else
---                clk16_reg + 1;
---  sPulse <= '1' when clk16_reg = 0 else '0';
-  sPulse <= '1';
+  -- purpose: free running mod-52 counter, independent of FSMD
+  mod_52_counter : process (clk, reset) is
+  begin  -- process mod_52_counter
+    if reset = '1' then                 -- asynchronous reset (active low)
+      clk16_reg <= (others => '0');
+    elsif clk'event and clk = '1' then  -- rising clock edge
+      clk16_reg <= clk16_next;
+    end if;
+  end process mod_52_counter;
+
+  -- next-state / output logic
+  clk16_next <= (others => '0') when clk16_reg = (DVSR-1) else
+                clk16_reg + 1;
+  sPulse <= '1' when clk16_reg = 0 else '0';
+--  sPulse <= '1';
 
   -- purpose: FSMD state & DATA registers
   fsmd_state_data : process (clk, reset) is
