@@ -23,7 +23,7 @@ module spi_master_top
    localparam MAX_BYTES_PER_CS  =  4; // 4 bytes per a transaction
    localparam CS_INACTIVE_CLKS  =  1;
 
-   enum   {eSpiIdle, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
+   enum   {eSpiIdle, eSpiIdle1, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
 
    logic [4:0][7:0] uartRcvDataArr;
    always_ff@(posedge clk40M)begin
@@ -35,10 +35,10 @@ module spi_master_top
          uartRcvDataArr[4]  <= i_dataMsb  ;
       end
    end
-   wire cmd = uartRcvDataArr[0];
+   wire[7:0] cmd = uartRcvDataArr[0];
 
    logic [7:0] spi_tx_byte ;
-   logic       spi_tx_dv, spi_tx_dv_next;
+   logic       spi_tx_dv ;
    logic       spi_tx_ready, spi_tx_ready_dly;
    logic [2:0] spiTxDataIndex;
    logic       resetIndex, increaseIndex;
@@ -67,7 +67,12 @@ module spi_master_top
       increaseIndex = 1'b0;
       case(spiState)
         eSpiIdle: begin
-           if(cmdUpdate && cmd == 8'hA1)begin
+           if(cmdUpdate)begin
+              spiStateNext       = eSpiIdle1;
+           end
+        end
+        eSpiIdle1: begin
+           if(cmd == 8'hA1)begin
               spiStateNext       = eSpiSetupData;
               resetIndex = 1'b1;
            end
@@ -110,7 +115,7 @@ module spi_master_top
        ,.i_TX_DV          (spi_tx_dv        )
        ,.o_TX_Ready       (spi_tx_ready     )
 
-       ,.o_RX_Count       (                 )
+       ,.o_RX_Count       (w_Master_RX_Count)
        ,.o_RX_DV          (                 )
        ,.o_RX_Byte        (                 )
 

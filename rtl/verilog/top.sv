@@ -40,7 +40,7 @@ uart_rx_top
 uart_rx_top0
    (   .clk40M   (clk40M   )
     ,  .nRst     (nRst     )
-    ,  .serialIn (serialIn )
+    ,  .serialIn (uart_rx  )
     ,  .cmdUpdate(cmdUpdate)
     ,  .cmd      (cmd      )
     ,  .addrLsb  (addrLsb  )
