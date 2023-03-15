@@ -3,3 +3,6 @@ design/sim/rtl_sim/work/
 design/sim/rtl_sim/*.wlf
 design/sim/rtl_sim/transcript
 design/sim/rtl_sim/dump.vcd
+design/sim/rtl_sim/*.do
+design/sim/rtl_sim/vlog.opt
+design/sim/rtl_sim/*.ini
