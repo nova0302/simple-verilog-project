@@ -61,13 +61,13 @@ module top_tb;
       @(txDone);
       task_uart_tx(8'ha1);
       @(txDone);
-      task_uart_tx(8'ha1);
-      @(txDone);
       task_uart_tx(8'ha0);
       @(txDone);
-      task_uart_tx(8'hd1);
+      task_uart_tx(8'ha1);
       @(txDone);
       task_uart_tx(8'hd0);
+      @(txDone);
+      task_uart_tx(8'hd1);
       @(txDone);
       repeat(3000) @(posedge clk40M);
       repeat(3000) @(posedge clk40M);
@@ -91,6 +91,9 @@ module top_tb;
       ,.tByte        (tByte        )
       ,.txDone       (txDone       ));
 
+   bit lvds_clk          = 1'b0;
+   logic [15:0] lvds_ch0 = 16'h0000;
+
    top #(.DVSR      (DVSR1     ))
    dut
      (
@@ -99,10 +102,14 @@ module top_tb;
       ,.nRst   (nRst   )
       ,.uart_rx(uart_rx)
       ,.uart_tx(uart_tx)
+
       ,.spi_clk(spi_clk)
       ,.sl     (sl     )
       ,.mosi   (mosi   )
       ,.miso   (miso   )
+
+      ,.lvds_clk   (lvds_clk )
+      ,.lvds_ch0   (lvds_ch0 )
       );
 
 
