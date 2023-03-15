@@ -46,6 +46,7 @@ architecture str of uart_receiver is
   signal nReg, nNext           : unsigned(2 downto 0);
   signal bReg, bNext           : std_logic_vector(7 downto 0);  -- rx buf register
   signal sPulse                : std_logic;
+  signal rcvDataValidNext      : std_logic;
 begin  -- architecture str
 
   -- purpose: free running mod-52 counter, independent of FSMD
@@ -72,24 +73,27 @@ begin  -- architecture str
       sReg     <= (others => '0');
       nReg     <= (others => '0');
       bReg     <= (others => '0');
+      rcvDataValid <='0';
     elsif clk'event and clk = '1' then  -- rising clock edge
       regState <= nState;
       sReg     <= sNext;
       nReg     <= nNext;
       bReg     <= bNext;
+      rcvDataValid <= rcvDataValidNext;
     end if;
   end process fsmd_state_data;
 
   -- purpose: next-state & DATA path functional units/routing
   --next_state_logic : process (all)
-  next_state_logic : process (bReg, nReg, regState, rx, sPulse, sReg)
+  --next_state_logic : process (bReg, nReg, regState, rx, sPulse, sReg)
+  next_state_logic : process (all)
   begin  -- process next_state_logic
     nState       <= regState;
     sNext        <= sReg;
     nNext        <= nReg;
     bNext        <= bReg;
     ready        <= '1';
-    rcvDataValid <= '0';
+    rcvDataValidNext <= '0';
     case regState is
       when IDLE =>
         if rx = '0' then
@@ -125,7 +129,7 @@ begin  -- architecture str
           if sReg = 15 then
             nState       <= IDLE;
             sNext        <= (others => '0');
-            rcvDataValid <= '1';
+            rcvDataValidNext <= '1';
           else
             sNext <= sReg + 1;
           end if;

@@ -53,7 +53,8 @@ architecture str of uart_transmitter is
   signal start                 : std_logic;  -- signals start of transmission
   signal sPulse                : std_logic;  -- signals start of transmission
   --signal clk16_reg, clk16_next : unsigned(5 downto 0);
-  signal clk16_reg, clk16_next : unsigned(7 downto 0);
+  signal clk16_reg, clk16_next : unsigned(8 downto 0);
+  signal txDoneNext : std_logic;
 
 begin  -- architecture str
 
@@ -85,7 +86,7 @@ begin  -- architecture str
     clear         <= '0';
     shift         <= '0';
     start         <= '0';
-    txDone        <= '0';
+    txDoneNext        <= '0';
     case regState is
       when IDLE =>
         if byteReady = '1' then
@@ -108,7 +109,7 @@ begin  -- architecture str
           else
             clear  <= '1';
             nState <= IDLE;
-            txDone <= '1';
+            txDoneNext <= '1';
           end if;
         end if;
     end case;
@@ -119,8 +120,10 @@ begin  -- architecture str
   begin  -- process state_transitions
     if nRST = '0' then                  -- asynchronous reset (active low)
       regState <= IDLE;
+      txDone <= '0';
     elsif clk'event and clk = '1' then  -- rising clock edge
       regState <= nState;
+      txDone <= txDoneNext;
     end if;
   end process state_transitions;
 

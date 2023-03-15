@@ -7,8 +7,10 @@ module top_tb;
 
    localparam real T_40Mhz   = 25;
    //localparam DVSR      = 22;
-   localparam DVSR      = 174;
-   localparam DVSR1     = 11;
+   //localparam DVSR      = 174;
+   localparam DVSR      = 347;
+   //localparam DVSR1     = 11;
+   localparam DVSR1     = 22;
    localparam WORD_SIZE =  8;
 
    bit clk25M = 1'b0;
@@ -31,10 +33,12 @@ module top_tb;
 
    task task_uart_tx (input [7:0] txData);
       begin
-         {ldXmtDataReg, byteReady, tByte} <= 3'b000;
-         dataBus <= txData;
-         @(posedge clk40M);
+         //{ldXmtDataReg, byteReady, tByte} <= 3'b000;
+         //dataBus <= txData;
+         //@(posedge clk40M);
+
          {ldXmtDataReg, byteReady, tByte} <= 3'b100;
+         dataBus <= txData;
          @(posedge clk40M);
          {ldXmtDataReg, byteReady, tByte} <= 3'b010;
          @(posedge clk40M);
@@ -65,6 +69,9 @@ module top_tb;
       @(txDone);
       task_uart_tx(8'hd0);
       @(txDone);
+      repeat(3000) @(posedge clk40M);
+      repeat(3000) @(posedge clk40M);
+      repeat(3000) @(posedge clk40M);
       repeat(3000) @(posedge clk40M);
       $finish;
    end
