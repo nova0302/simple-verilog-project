@@ -21,8 +21,6 @@ module top
     ,input[15:0] lvds_ch3
     );
 
-
-
    wire [7:0] cmd;
    wire [7:0] addrLsb;
    wire [7:0] addrMsb;
@@ -66,7 +64,20 @@ module top
    assign lvds_ch[2] = lvds_ch2;
    assign lvds_ch[3] = lvds_ch3;
    logic [3:0][15:0] fifoOut;
-   logic [1:0]       channelCount, channelCountNext;
+   wire [7:0][7:0]   fifoOutArr;
+   assign fifoOutArr[0] = fifoOut[0][7:0];
+   assign fifoOutArr[1] = fifoOut[0][15:8];
+   assign fifoOutArr[2] = fifoOut[1][7:0];
+   assign fifoOutArr[3] = fifoOut[1][15:8];
+   assign fifoOutArr[4] = fifoOut[2][7:0];
+   assign fifoOutArr[5] = fifoOut[2][15:8];
+   assign fifoOutArr[6] = fifoOut[3][7:0];
+   assign fifoOutArr[7] = fifoOut[3][15:8];
+
+   logic [10:0][15:0] initAddr;
+   logic [10:0][15:0] initData;
+
+   logic [2:0]       channelCount, channelCountNext;
 
    genvar      i;
    generate
@@ -89,11 +100,17 @@ module top
    endgenerate
 
    enum {eInit, eLdXmtDataReg, eByteReady, eTByte, eWiatForTxDone}currState, nextState;
-   always_ff@(posedge clk40M, negedge nRst)begin
+   always_ff@(posedge clk40M, negedge nRst) begin
       if(~nRst)
         currState <= eInit;
       else
         currState <= nextState;
+   end
+   always_ff@(posedge clk40M, negedge nRst) begin
+      if(!nRst)
+        channelCount <= 3'b000;
+      else
+        channelCount <= channelCountNext;
    end
 
    bit ldXmtDataReg;
@@ -113,16 +130,16 @@ module top
            if(!empty[0])begin
               nextState = eLdXmtDataReg;
               rd = 4'hf;
-              channelCountNext = 2'b00;
+              channelCountNext = 3'b000;
            end
         end
         eLdXmtDataReg: begin
            nextState = eByteReady;
-           ldXmtDataReg = 1'b0;
+           ldXmtDataReg = 1'b1;
         end
         eByteReady: begin
            nextState = eTByte;
-           byteReady = 1'b0;
+           byteReady = 1'b1;
         end
         eTByte: begin
            nextState = eWiatForTxDone;
@@ -130,19 +147,19 @@ module top
         end
         eWiatForTxDone: begin
            if(txDone) begin
-              if(channelCount<4)begin
-                 channelCountNext = channelCount + 1'b1;
-                 nextState = eLdXmtDataReg;
+              if(channelCount == 3'b111)begin
+                 nextState = eInit;
               end
               else begin
-                 nextState = eInit;
+                 nextState = eLdXmtDataReg;
+                 channelCountNext = channelCount + 1'b1;
               end
            end
         end
       endcase // case (currState)
    end
 
-   assign dataBus = fifoOut[channelCount];
+   assign dataBus = fifoOutArr[channelCount];
 
    uart_transmitter
      #(

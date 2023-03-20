@@ -23,7 +23,7 @@ module spi_master_top
    localparam MAX_BYTES_PER_CS  =  4; // 4 bytes per a transaction
    localparam CS_INACTIVE_CLKS  =  1;
 
-   enum   {eSpiIdle, eSpiIdle1, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
+   enum   {eSpiInit, eSpiInit1, eSpiIdle, eSpiIdle1, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
 
    logic [4:0][7:0] uartRcvDataArr;
    always_ff@(posedge clk40M)begin
@@ -42,9 +42,10 @@ module spi_master_top
    logic       spi_tx_ready, spi_tx_ready_dly;
    logic [2:0] spiTxDataIndex;
    logic       resetIndex, increaseIndex;
+   integer     initCounter, initCounterNext;
    always_ff@(posedge clk40M, negedge nRst)begin
       if(!nRst)begin
-         spiState       <= eSpiIdle;
+         spiState       <= eSpiInit;
          spiTxDataIndex <= 3'b001;
       end
       else begin
@@ -58,6 +59,21 @@ module spi_master_top
          spi_tx_ready_dly <= spi_tx_ready;
       end
    end
+   always_ff@(posedge clk40M, negedge nRst)begin
+      if(!nRst)
+        initCounter <= 0;
+      else
+        initCounter <= initCounterNext;
+   end
+
+
+   logic [0:9][15:0] initAddr=
+'{16'h0030, 16'h00f3, 16'h00f9, 16'h0000, 16'h0001,
+  16'h0033, 16'h00a0, 16'h00a2, 16'h0038, 16'h0031};
+
+   logic [0:9][15:0] initData=
+'{16'h0001, 16'h0000, 16'hc007, 16'h0000, 16'h0000,
+  16'h0001, 16'h0000, 16'h0001, 16'h0000, 16'h0001};
 
    always_comb begin
       spi_tx_byte = 8'h00;
@@ -65,11 +81,21 @@ module spi_master_top
       spiStateNext = eSpiIdle;
       resetIndex = 1'b0;
       increaseIndex = 1'b0;
+      initCounterNext = initCounter;
       case(spiState)
+
+        eSpiInit: begin
+           spiStateNext       = eSpiInit1;
+           initCounterNext = 0;
+        end
+
+        eSpiInit1: begin
+           spiStateNext       = eSpiInit1;
+        end
+
         eSpiIdle: begin
-           if(cmdUpdate)begin
-              spiStateNext       = eSpiIdle1;
-           end
+           if(cmdUpdate)
+             spiStateNext       = eSpiIdle1;
         end
         eSpiIdle1: begin
            if(cmd == 8'hA1)begin

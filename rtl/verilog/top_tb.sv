@@ -17,6 +17,9 @@ module top_tb;
    bit clk25M = 1'b0;
    bit nRst   = 1'b0;
 
+   wire rcvDataValid;
+   wire [7:0] pout;
+
    wire  uart_rx ;
    wire  uart_tx;
    wire  spi_clk;
@@ -85,14 +88,17 @@ module top_tb;
       task_lvds(16'h0007);
       task_lvds(16'h0008);
       task_lvds(16'h0009);
-      task_lvds(16'haaaa);
-      task_lvds(16'haaab);
-      task_lvds(16'haaac);
-      task_lvds(16'haaad);
-      task_lvds(16'haaae);
-      task_lvds(16'haaaf);
-      task_lvds(16'haaaa);
-      repeat(3000) @(posedge clk40M);
+      task_lvds(16'h000a);
+      task_lvds(16'h000b);
+      task_lvds(16'h000c);
+      task_lvds(16'h000d);
+      task_lvds(16'h000e);
+      task_lvds(16'h000f);
+      task_lvds(16'h000a);
+      repeat(128) begin
+         @(posedge rcvDataValid);
+         $display("%0t - rcvData: 0x%0h", $time, pout);
+      end
       repeat(3000) @(posedge clk40M);
       repeat(3000) @(posedge clk40M);
       $finish;
@@ -130,8 +136,21 @@ module top_tb;
 
       ,.lvds_clk   (lvds_clk )
       ,.lvds_ch0   (lvds_ch0 )
+      ,.lvds_ch1   (lvds_ch0 )
+      ,.lvds_ch2   (lvds_ch0 )
+      ,.lvds_ch3   (lvds_ch0 )
 
       );
+
+   uart_receiver
+     #(.DVSR(DVSR1))
+   uart_receiver0
+     ( .clk              (clk40M        )
+       ,.reset           (~nRst         )
+       ,.rx              (uart_tx       ) // rx serial data from pc
+       ,.ready           (              )
+       ,.rcvDataValid    (rcvDataValid  )
+       ,.pout            (pout          ));
 
 
 endmodule // top
