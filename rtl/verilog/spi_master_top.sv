@@ -1,3 +1,4 @@
+`define fun_sim
 
 module spi_master_top
   (input clk40M
@@ -23,7 +24,7 @@ module spi_master_top
    localparam MAX_BYTES_PER_CS  =  4; // 4 bytes per a transaction
    localparam CS_INACTIVE_CLKS  =  1;
 
-   enum   {eSpiInit, eSpiInit1, eSpiIdle, eSpiIdle1, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
+   enum   {eSpiInit, eSpiInitWait, eSpiInitDly, eSpiIdle, eSpiIdle1, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
 
    logic [4:0][7:0] uartRcvDataArr;
    always_ff@(posedge clk40M)begin
@@ -75,22 +76,78 @@ module spi_master_top
 '{16'h0001, 16'h0000, 16'hc007, 16'h0000, 16'h0000,
   16'h0001, 16'h0000, 16'h0001, 16'h0000, 16'h0001};
 
+   wire [0:39][7:0] initAddrData;
+
+   genvar            i;
+   generate
+      for(i=0; i<10; i++) begin:wire_connection
+         assign initAddrData[4*i+0] = initAddr[i][7:0];
+         assign initAddrData[4*i+1] = initAddr[i][15:8];
+         assign initAddrData[4*i+2] = initData[i][7:0];
+         assign initAddrData[4*i+3] = initData[i][15:8];
+      end
+   endgenerate
+
+   wire spi_ready = spi_tx_ready & ~spi_tx_ready_dly;
+
+   bit setDelayCounter;
+   integer delayCounter, delayCounterNext;
+   always_ff@(posedge clk40M, negedge nRst) begin
+      if(!nRst)
+        delayCounter <= 0;
+      else if(setDelayCounter)
+        delayCounter = delayCounterNext;
+      else if(delayCounter > 0)
+        delayCounter = delayCounter - 1;
+   end
+
    always_comb begin
       spi_tx_byte = 8'h00;
       spi_tx_dv= 1'b0;
-      spiStateNext = eSpiIdle;
+      spiStateNext = spiState;
       resetIndex = 1'b0;
       increaseIndex = 1'b0;
       initCounterNext = initCounter;
+      setDelayCounter = 1'b0;
+      delayCounterNext = 0;
+
       case(spiState)
 
         eSpiInit: begin
-           spiStateNext       = eSpiInit1;
-           initCounterNext = 0;
+           spiStateNext = eSpiInitWait;
+           spi_tx_byte = initAddrData[initCounter];
+           spi_tx_dv = 1'b1;
         end
 
-        eSpiInit1: begin
-           spiStateNext       = eSpiInit1;
+        eSpiInitWait:begin
+           if(spi_ready)begin
+              if(initCounter == 3 || initCounter == 4)begin
+                 spiStateNext = eSpiInitDly;
+                 setDelayCounter = 1'b1;
+                 initCounterNext = initCounter + 1;
+              end
+              else if(initCounter == 39)begin
+                 spiStateNext = eSpiIdle;
+              end
+              else begin
+                 spiStateNext = eSpiInit;
+                 initCounterNext = initCounter + 1;
+              end
+`ifdef fun_sim
+              if(initCounter == 3) delayCounterNext = 20; //500us
+              if(initCounter == 4) delayCounterNext = 4;
+`else
+              if(initCounter == 3) delayCounterNext = 20000; //500us
+              if(initCounter == 4) delayCounterNext = 4000;
+`endif
+           end // if (spi_ready)
+        end
+
+        eSpiInitDly: begin
+           if(delayCounter > 0)
+             spiStateNext = eSpiInitDly;
+           else
+             spiStateNext = eSpiInit;
         end
 
         eSpiIdle: begin
@@ -109,7 +166,7 @@ module spi_master_top
            spi_tx_dv   = 1'b1;
         end
         eSpiWaitForReady: begin
-           if(spi_tx_ready && !spi_tx_ready_dly)begin
+           if(spi_ready)begin
               if(spiTxDataIndex == 4)begin
                  spiStateNext = eSpiIdle;
               end
