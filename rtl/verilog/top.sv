@@ -65,21 +65,28 @@ module top
    assign lvds_ch[3] = lvds_ch3;
    logic [3:0][15:0] fifoOut;
    wire [7:0][7:0]   fifoOutArr;
-   assign fifoOutArr[0] = fifoOut[0][7:0];
-   assign fifoOutArr[1] = fifoOut[0][15:8];
-   assign fifoOutArr[2] = fifoOut[1][7:0];
-   assign fifoOutArr[3] = fifoOut[1][15:8];
-   assign fifoOutArr[4] = fifoOut[2][7:0];
-   assign fifoOutArr[5] = fifoOut[2][15:8];
-   assign fifoOutArr[6] = fifoOut[3][7:0];
-   assign fifoOutArr[7] = fifoOut[3][15:8];
 
-   logic [10:0][15:0] initAddr;
-   logic [10:0][15:0] initData;
+   genvar            j;
+   generate
+      for(j=0; j<4; j++) begin
+         assign fifoOutArr[2*j  ] = fifoOut[j][7:0];
+         assign fifoOutArr[2*j+1] = fifoOut[j][15:8];
+      end
+   endgenerate
+
+   //assign fifoOutArr[0] = fifoOut[0][7:0];
+   //assign fifoOutArr[1] = fifoOut[0][15:8];
+   //assign fifoOutArr[2] = fifoOut[1][7:0];
+   //assign fifoOutArr[3] = fifoOut[1][15:8];
+   //assign fifoOutArr[4] = fifoOut[2][7:0];
+   //assign fifoOutArr[5] = fifoOut[2][15:8];
+   //assign fifoOutArr[6] = fifoOut[3][7:0];
+   //assign fifoOutArr[7] = fifoOut[3][15:8];
+
 
    logic [2:0]       channelCount, channelCountNext;
 
-   genvar      i;
+   genvar            i;
    generate
       for(i=0; i<4; i++) begin: gen_image_buf
          image_buffer

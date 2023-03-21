@@ -162,6 +162,9 @@ module spi_master_top
               spiStateNext       = eSpiSetupData;
               resetIndex = 1'b1;
            end
+           else begin
+             spiStateNext = eSpiIdle;
+           end
         end
         eSpiSetupData: begin
            spiStateNext = eSpiWaitForReady;
