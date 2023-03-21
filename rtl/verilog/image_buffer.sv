@@ -1,3 +1,12 @@
+/*
+ *   Clock Doamin Crossing
+ *    signals from uart
+ *   clk40M <-> lvds_clk
+ *   , input cmdUpdate
+ *   , input[7:0]cmd
+ *
+ */
+
 module image_buffer
   (
    input clk40M
@@ -20,9 +29,8 @@ module image_buffer
    always_ff@(posedge clk40M, negedge nRst)begin
       if(!nRst)
         cmdReg <= 8'h00;
-      else
-        if(cmdUpdate)
-          cmdReg <= cmd;
+      else if(cmdUpdate)
+        cmdReg <= cmd;
    end
    // fast(40M) to slow(1M) stratching is needed
    integer stretchCounter;
