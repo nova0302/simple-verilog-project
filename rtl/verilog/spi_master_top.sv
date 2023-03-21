@@ -24,6 +24,14 @@ module spi_master_top
    localparam MAX_BYTES_PER_CS  =  4; // 4 bytes per a transaction
    localparam CS_INACTIVE_CLKS  =  1;
 
+`ifdef fun_sim
+   localparam DELAY_500US  =  20;
+   localparam DELAY_100US  =  5;
+`else
+   localparam DELAY_500US  =  20000;
+   localparam DELAY_100US  =  5000;
+`endif
+
    enum   {eSpiInit, eSpiInitWait, eSpiInitDly, eSpiIdle, eSpiIdle1, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
 
    logic [4:0][7:0] uartRcvDataArr;
@@ -133,13 +141,8 @@ module spi_master_top
                  spiStateNext = eSpiInit;
                  initCounterNext = initCounter + 1;
               end
-`ifdef fun_sim
-              if(initCounter == 3) delayCounterNext = 20; //500us
-              if(initCounter == 4) delayCounterNext = 4;
-`else
-              if(initCounter == 3) delayCounterNext = 20000; //500us
-              if(initCounter == 4) delayCounterNext = 4000;
-`endif
+              if(initCounter == 3) delayCounterNext = DELAY_500US; //500us
+              if(initCounter == 4) delayCounterNext = DELAY_100US;
            end // if (spi_ready)
         end
 
