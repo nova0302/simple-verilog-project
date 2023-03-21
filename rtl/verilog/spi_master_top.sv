@@ -32,7 +32,7 @@ module spi_master_top
    localparam DELAY_100US  =  5000;
 `endif
 
-   enum   {eSpiInit, eSpiInitWait, eSpiInitDly, eSpiIdle, eSpiIdle1, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
+   enum   {eSpiInit, eSpiInitWait, eSpiInitDly, eSpiIdle, eSpiChkCmd, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
 
    logic [4:0][7:0] uartRcvDataArr;
    always_ff@(posedge clk40M)begin
@@ -155,9 +155,9 @@ module spi_master_top
 
         eSpiIdle: begin
            if(cmdUpdate)
-             spiStateNext       = eSpiIdle1;
+             spiStateNext       = eSpiChkCmd;
         end
-        eSpiIdle1: begin
+        eSpiChkCmd: begin
            if(cmd == 8'hA1)begin
               spiStateNext       = eSpiSetupData;
               resetIndex = 1'b1;

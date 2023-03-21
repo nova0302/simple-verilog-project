@@ -1,4 +1,9 @@
-
+/*
+ *  cmd
+ * A0 -> TG
+ * A1 -> spi
+ * A2 -> image buffer
+ */
 
 module top_tb;
 
