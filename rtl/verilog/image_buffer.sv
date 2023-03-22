@@ -1,7 +1,7 @@
 /*
- *   Clock Doamin Crossing
+ *   Clock Domain Crossing
  *    signals from uart
- *   clk40M <-> lvds_clk
+ *   UART(clk40M) <-> selectIO(lvds_clk)
  *   , input cmdUpdate
  *   , input[7:0]cmd
  *
@@ -37,19 +37,18 @@ module image_buffer
    always_ff@(posedge clk40M, negedge nRst)begin
       if(cmdUpdate)
         stretchCounter <= 80;
-      else
-        if(stretchCounter > 0)
-          stretchCounter <= stretchCounter - 1;
+      else if(stretchCounter > 0)
+        stretchCounter <= stretchCounter - 1;
    end
    wire cmdUpdateStretched = (stretchCounter > 0) ? 1'b1 : 1'b0;
 
 
    /******************** 1MHz Domain(lvds_clk)    ***********************/
 
-   bit  regCmdUpdate, cmdUpdateMeta;
+   bit  cmdUpdateReg, cmdUpdateMeta;
    always_ff@(posedge lvds_clk) begin
       cmdUpdateMeta <= cmdUpdateStretched;
-      regCmdUpdate <= cmdUpdateMeta;
+      cmdUpdateReg <= cmdUpdateMeta;
    end
 
    enum {eInit, eWaitForValidPixel, eValidPixel}currState, nextState;
@@ -81,7 +80,7 @@ module image_buffer
       fifoIn = 16'h00;
       case(currState)
         eInit: begin
-           if(regCmdUpdate == 1'b1 && cmdReg == 8'hA2)
+           if(cmdUpdateReg == 1'b1 && cmdReg == 8'hA2)
              nextState = eWaitForValidPixel;
         end
 
@@ -99,7 +98,7 @@ module image_buffer
            if(mod16Counter > 0)
              nextState = eValidPixel;
            else
-             nextState <= eInit;
+             nextState = eInit;
         end
       endcase // case (currState)
    end

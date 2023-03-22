@@ -104,16 +104,16 @@ module spi_master_top
       if(!nRst)
         delayCounter <= 0;
       else if(setDelayCounter)
-        delayCounter = delayCounterNext;
+        delayCounter <= delayCounterNext;
       else if(delayCounter > 0)
-        delayCounter = delayCounter - 1;
+        delayCounter <= delayCounter - 1;
    end
 
    always_comb begin
-      spi_tx_byte = 8'h00;
-      spi_tx_dv= 1'b0;
+      spi_tx_byte  = 8'h00;
+      spi_tx_dv    = 1'b0;
       spiStateNext = spiState;
-      resetIndex = 1'b0;
+      resetIndex   = 1'b0;
       increaseIndex = 1'b0;
       initCounterNext = initCounter;
       setDelayCounter = 1'b0;
@@ -129,27 +129,25 @@ module spi_master_top
 
         eSpiInitWait:begin
            if(spi_ready)begin
-              if(initCounter == 3 || initCounter == 4)begin
-                 spiStateNext = eSpiInitDly;
-                 setDelayCounter = 1'b1;
-                 initCounterNext = initCounter + 1;
-              end
-              else if(initCounter == 39)begin
-                 spiStateNext = eSpiIdle;
-              end
-              else begin
-                 spiStateNext = eSpiInit;
-                 initCounterNext = initCounter + 1;
-              end
+
+              if(initCounter == 39)
+                spiStateNext = eSpiIdle;
+              else if(initCounter == 3 || initCounter == 4)
+                spiStateNext = eSpiInitDly;
+              else
+                spiStateNext = eSpiInit;
+
+              if(initCounter < 39)
+                initCounterNext = initCounter + 1;
+              if(initCounter == 3 || initCounter == 4)
+                setDelayCounter = 1'b1;
               if(initCounter == 3) delayCounterNext = DELAY_500US; //500us
               if(initCounter == 4) delayCounterNext = DELAY_100US;
            end // if (spi_ready)
         end
 
         eSpiInitDly: begin
-           if(delayCounter > 0)
-             spiStateNext = eSpiInitDly;
-           else
+           if(delayCounter < 1)
              spiStateNext = eSpiInit;
         end
 
@@ -163,7 +161,7 @@ module spi_master_top
               resetIndex = 1'b1;
            end
            else begin
-             spiStateNext = eSpiIdle;
+              spiStateNext = eSpiIdle;
            end
         end
         eSpiSetupData: begin
@@ -180,9 +178,6 @@ module spi_master_top
                  spiStateNext = eSpiSetupData;
                  increaseIndex = 1'b1;
               end
-           end
-           else begin
-              spiStateNext = eSpiWaitForReady;
            end
         end
       endcase // case (spiState)
