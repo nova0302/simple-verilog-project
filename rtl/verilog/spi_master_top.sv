@@ -68,6 +68,20 @@ module spi_master_top
          spi_tx_ready_dly <= spi_tx_ready;
       end
    end
+
+   always_ff@(posedge clk40M, negedge nRst)begin
+      if(!nRst)
+        spiTxDataIndex <= 3'b001;
+      else if(resetIndex)
+        spiTxDataIndex   <= 3'b001;
+      else if(increaseIndex)
+        spiTxDataIndex <= spiTxDataIndex + 1;
+   end
+
+   always_ff@(posedge clk40M) begin
+      spi_tx_ready_dly <= spi_tx_ready;
+   end
+
    always_ff@(posedge clk40M, negedge nRst)begin
       if(!nRst)
         initCounter <= 0;
@@ -75,16 +89,15 @@ module spi_master_top
         initCounter <= initCounterNext;
    end
 
-
    logic [0:9][15:0] initAddr=
-'{16'h0030, 16'h00f3, 16'h00f9, 16'h0000, 16'h0001,
-  16'h0033, 16'h00a0, 16'h00a2, 16'h0038, 16'h0031};
+              '{16'h0030, 16'h00f3, 16'h00f9, 16'h0000, 16'h0001,
+                16'h0033, 16'h00a0, 16'h00a2, 16'h0038, 16'h0031};
 
    logic [0:9][15:0] initData=
-'{16'h0001, 16'h0000, 16'hc007, 16'h0000, 16'h0000,
-  16'h0001, 16'h0000, 16'h0001, 16'h0000, 16'h0001};
+              '{16'h0001, 16'h0000, 16'hc007, 16'h0000, 16'h0000,
+                16'h0001, 16'h0000, 16'h0001, 16'h0000, 16'h0001};
 
-   wire [0:39][7:0] initAddrData;
+   wire [0:39][7:0]  initAddrData;
 
    genvar            i;
    generate
@@ -98,15 +111,12 @@ module spi_master_top
 
    wire spi_ready = spi_tx_ready & ~spi_tx_ready_dly;
 
-   bit setDelayCounter;
    integer delayCounter, delayCounterNext;
    always_ff@(posedge clk40M, negedge nRst) begin
       if(!nRst)
         delayCounter <= 0;
-      else if(setDelayCounter)
+      else
         delayCounter <= delayCounterNext;
-      else if(delayCounter > 0)
-        delayCounter <= delayCounter - 1;
    end
 
    always_comb begin
@@ -116,8 +126,7 @@ module spi_master_top
       resetIndex   = 1'b0;
       increaseIndex = 1'b0;
       initCounterNext = initCounter;
-      setDelayCounter = 1'b0;
-      delayCounterNext = 0;
+      delayCounterNext = delayCounter;
 
       case(spiState)
 
@@ -139,14 +148,16 @@ module spi_master_top
 
               if(initCounter < 39)
                 initCounterNext = initCounter + 1;
-              if(initCounter == 3 || initCounter == 4)
-                setDelayCounter = 1'b1;
+
               if(initCounter == 3) delayCounterNext = DELAY_500US; //500us
+
               if(initCounter == 4) delayCounterNext = DELAY_100US;
            end // if (spi_ready)
         end
 
         eSpiInitDly: begin
+           if(delayCounter > 0)
+             delayCounterNext = delayCounter - 1;
            if(delayCounter < 1)
              spiStateNext = eSpiInit;
         end
