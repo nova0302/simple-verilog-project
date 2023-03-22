@@ -53,20 +53,10 @@ module spi_master_top
    logic       resetIndex, increaseIndex;
    integer     initCounter, initCounterNext;
    always_ff@(posedge clk40M, negedge nRst)begin
-      if(!nRst)begin
+      if(!nRst)
          spiState       <= eSpiInit;
-         spiTxDataIndex <= 3'b001;
-      end
-      else begin
+      else
          spiState <= spiStateNext;
-
-         if(resetIndex)
-           spiTxDataIndex   <= 3'b001;
-         else if(increaseIndex)
-           spiTxDataIndex <= spiTxDataIndex + 1;
-
-         spi_tx_ready_dly <= spi_tx_ready;
-      end
    end
 
    always_ff@(posedge clk40M, negedge nRst)begin
