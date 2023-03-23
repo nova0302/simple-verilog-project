@@ -77,18 +77,6 @@ module spi_master_top
               '{16'h0001, 16'h0000, 16'hc007, 16'h0000, 16'h0000,
                 16'h0001, 16'h0000, 16'h0001, 16'h0000, 16'h0001};
 
-   wire [0:39][7:0]  initAddrData;
-
-   genvar            i;
-   generate
-      for(i=0; i<10; i++) begin:wire_connection
-         assign initAddrData[4*i+0] = initAddr[i][7:0];
-         assign initAddrData[4*i+1] = initAddr[i][15:8];
-         assign initAddrData[4*i+2] = initData[i][7:0];
-         assign initAddrData[4*i+3] = initData[i][15:8];
-      end
-   endgenerate
-
    logic[0:3][7:0] spi_tx_byte_array, spi_tx_byte_array_next;
    always_ff@(posedge clk40M, negedge nRst)begin
       if(!nRst)
@@ -98,6 +86,7 @@ module spi_master_top
    end
 
    bit spiTxStart;
+   bit spiTxDone;
 
    wire spi_ready = spi_tx_ready & ~spi_tx_ready_dly;
 
@@ -120,10 +109,10 @@ module spi_master_top
 
         eSpiInit: begin
            spiStateNext = eSpiInit1;
-           spi_tx_byte_array_next[0] = initAddrData[4*initDataIndex + 0 ];
-           spi_tx_byte_array_next[1] = initAddrData[4*initDataIndex + 1 ];
-           spi_tx_byte_array_next[2] = initAddrData[4*initDataIndex + 2 ];
-           spi_tx_byte_array_next[3] = initAddrData[4*initDataIndex + 3 ];
+           spi_tx_byte_array_next[0] = initAddr[initDataIndex][7:0];
+           spi_tx_byte_array_next[1] = initAddr[initDataIndex][15:8];
+           spi_tx_byte_array_next[2] = initData[initDataIndex][7:0];
+           spi_tx_byte_array_next[3] = initData[initDataIndex][15:8];
         end
 
         eSpiInit1: begin
@@ -132,7 +121,7 @@ module spi_master_top
         end
 
         eSpiInitWait:begin
-           if(spi_ready)begin
+           if(spiTxDone)begin
               if(initDataIndex == 9)
                 spiStateNext = eSpiIdle;
               else if(initDataIndex == 3 || initDataIndex == 4)
@@ -170,7 +159,8 @@ module spi_master_top
            spiTxStart = 1'b1;
         end
         eSpiWaitForReady: begin
-           if(spi_ready)
+           //if(spi_ready)
+           if(spiTxDone)
              spiStateNext = eSpiIdle;
         end
       endcase // case (spiState)
@@ -196,6 +186,7 @@ module spi_master_top
       spi_tx_byte  = 8'h00;
       spiTxStateNext = spiTxState;
       spiTxByteIndexNext = spiTxByteIndex;
+      spiTxDone =1'b0;
       case(spiTxState)
         eSpiTxIdle: begin
            if(spiTxStart)begin
@@ -215,8 +206,8 @@ module spi_master_top
                 spiTxStateNext = eSpiTxIdle;
               else
                 spiTxStateNext = eSpiTxSetupData;
-              if(spiTxByteIndex < 3)
-                spiTxByteIndexNext = spiTxByteIndex + 1'b1;
+              if(spiTxByteIndex == 3) spiTxDone =1'b1;
+              if(spiTxByteIndex < 3) spiTxByteIndexNext = spiTxByteIndex + 1'b1;
            end
         end
       endcase // case (spiTxState)
