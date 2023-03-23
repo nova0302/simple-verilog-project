@@ -32,9 +32,9 @@ module spi_master_top
    localparam DELAY_100US  =  5000;
 `endif
 
-   enum   {eSpiInit, eSpiInitWait, eSpiInitDly, eSpiIdle, eSpiChkCmd, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
+   enum   {eSpiInit, eSpiInit1, eSpiInitWait, eSpiInitDly, eSpiIdle, eSpiChkCmd, eSpiSetupData, eSpiWaitForReady}spiState, spiStateNext;
 
-   logic [4:0][7:0] uartRcvDataArr;
+   logic [0:4][7:0] uartRcvDataArr;
    always_ff@(posedge clk40M)begin
       if(cmdUpdate)begin
          uartRcvDataArr[0]  <= i_cmd      ;
@@ -49,34 +49,24 @@ module spi_master_top
    logic [7:0] spi_tx_byte ;
    logic       spi_tx_dv ;
    logic       spi_tx_ready, spi_tx_ready_dly;
-   logic [2:0] spiTxDataIndex;
-   logic       resetIndex, increaseIndex;
-   integer     initCounter, initCounterNext;
    always_ff@(posedge clk40M, negedge nRst)begin
       if(!nRst)
-         spiState       <= eSpiInit;
+        spiState       <= eSpiInit;
       else
-         spiState <= spiStateNext;
-   end
-
-   always_ff@(posedge clk40M, negedge nRst)begin
-      if(!nRst)
-        spiTxDataIndex <= 3'b001;
-      else if(resetIndex)
-        spiTxDataIndex   <= 3'b001;
-      else if(increaseIndex)
-        spiTxDataIndex <= spiTxDataIndex + 1;
+        spiState <= spiStateNext;
    end
 
    always_ff@(posedge clk40M) begin
       spi_tx_ready_dly <= spi_tx_ready;
    end
 
+   //integer     initDataIndex, initDataIndexNext;
+   logic[3:0]     initDataIndex, initDataIndexNext;
    always_ff@(posedge clk40M, negedge nRst)begin
       if(!nRst)
-        initCounter <= 0;
+        initDataIndex <= 0;
       else
-        initCounter <= initCounterNext;
+        initDataIndex <= initDataIndexNext;
    end
 
    logic [0:9][15:0] initAddr=
@@ -99,6 +89,16 @@ module spi_master_top
       end
    endgenerate
 
+   logic[0:3][7:0] spi_tx_byte_array, spi_tx_byte_array_next;
+   always_ff@(posedge clk40M, negedge nRst)begin
+      if(!nRst)
+        spi_tx_byte_array <= '{8'h00, 8'h00, 8'h00, 8'h00};
+      else
+        spi_tx_byte_array <= spi_tx_byte_array_next;
+   end
+
+   bit spiTxStart;
+
    wire spi_ready = spi_tx_ready & ~spi_tx_ready_dly;
 
    integer delayCounter, delayCounterNext;
@@ -110,41 +110,41 @@ module spi_master_top
    end
 
    always_comb begin
-      spi_tx_byte  = 8'h00;
-      spi_tx_dv    = 1'b0;
       spiStateNext = spiState;
-      resetIndex   = 1'b0;
-      increaseIndex = 1'b0;
-      initCounterNext = initCounter;
+      initDataIndexNext = initDataIndex;
       delayCounterNext = delayCounter;
+      spi_tx_byte_array_next = spi_tx_byte_array;
+      spiTxStart = 1'b0;
 
       case(spiState)
 
         eSpiInit: begin
+           spiStateNext = eSpiInit1;
+           spi_tx_byte_array_next[0] = initAddrData[4*initDataIndex + 0 ];
+           spi_tx_byte_array_next[1] = initAddrData[4*initDataIndex + 1 ];
+           spi_tx_byte_array_next[2] = initAddrData[4*initDataIndex + 2 ];
+           spi_tx_byte_array_next[3] = initAddrData[4*initDataIndex + 3 ];
+        end
+
+        eSpiInit1: begin
            spiStateNext = eSpiInitWait;
-           spi_tx_byte = initAddrData[initCounter];
-           spi_tx_dv = 1'b1;
+           spiTxStart = 1'b1;
         end
 
         eSpiInitWait:begin
            if(spi_ready)begin
-
-              if(initCounter == 39)
+              if(initDataIndex == 9)
                 spiStateNext = eSpiIdle;
-              else if(initCounter == 3 || initCounter == 4)
+              else if(initDataIndex == 3 || initDataIndex == 4)
                 spiStateNext = eSpiInitDly;
               else
                 spiStateNext = eSpiInit;
 
-              if(initCounter < 39)
-                initCounterNext = initCounter + 1;
-
-              if(initCounter == 3) delayCounterNext = DELAY_500US; //500us
-
-              if(initCounter == 4) delayCounterNext = DELAY_100US;
+              if(initDataIndex < 9) initDataIndexNext = initDataIndex + 1;
+              if(initDataIndex == 3) delayCounterNext = DELAY_500US; //500us
+              if(initDataIndex == 4) delayCounterNext = DELAY_100US;
            end // if (spi_ready)
         end
-
         eSpiInitDly: begin
            if(delayCounter > 0)
              delayCounterNext = delayCounter - 1;
@@ -159,7 +159,7 @@ module spi_master_top
         eSpiChkCmd: begin
            if(cmd == 8'hA1)begin
               spiStateNext       = eSpiSetupData;
-              resetIndex = 1'b1;
+              spi_tx_byte_array_next = uartRcvDataArr[1:4];
            end
            else begin
               spiStateNext = eSpiIdle;
@@ -167,22 +167,60 @@ module spi_master_top
         end
         eSpiSetupData: begin
            spiStateNext = eSpiWaitForReady;
-           spi_tx_byte = uartRcvDataArr[spiTxDataIndex];
-           spi_tx_dv   = 1'b1;
+           spiTxStart = 1'b1;
         end
         eSpiWaitForReady: begin
-           if(spi_ready)begin
-              if(spiTxDataIndex == 4)begin
-                 spiStateNext = eSpiIdle;
-              end
-              else begin
-                 spiStateNext = eSpiSetupData;
-                 increaseIndex = 1'b1;
-              end
-           end
+           if(spi_ready)
+             spiStateNext = eSpiIdle;
         end
       endcase // case (spiState)
    end // always_comb
+
+   enum {eSpiTxIdle, eSpiTxSetupData, eSpiTxWaitForSpiReady}spiTxState, spiTxStateNext;
+   always_ff@(posedge clk40M, negedge nRst) begin
+      if(!nRst)
+        spiTxState <= eSpiTxIdle;
+      else
+        spiTxState <= spiTxStateNext;
+   end
+   logic [1:0] spiTxByteIndex, spiTxByteIndexNext;
+   always_ff@(posedge clk40M, negedge nRst) begin
+      if(!nRst)
+        spiTxByteIndex <= 2'b00;
+      else
+        spiTxByteIndex <= spiTxByteIndexNext;
+   end
+
+   always_comb begin
+      spi_tx_dv =1'b0;
+      spi_tx_byte  = 8'h00;
+      spiTxStateNext = spiTxState;
+      spiTxByteIndexNext = spiTxByteIndex;
+      case(spiTxState)
+        eSpiTxIdle: begin
+           if(spiTxStart)begin
+              spiTxStateNext = eSpiTxSetupData;
+              spiTxByteIndexNext = 2'b00;
+           end
+
+        end
+        eSpiTxSetupData: begin
+           spiTxStateNext = eSpiTxWaitForSpiReady;
+           spi_tx_byte = spi_tx_byte_array[spiTxByteIndex];
+           spi_tx_dv =1'b1;
+        end
+        eSpiTxWaitForSpiReady: begin
+           if(spi_ready) begin
+              if(spiTxByteIndex == 3)
+                spiTxStateNext = eSpiTxIdle;
+              else
+                spiTxStateNext = eSpiTxSetupData;
+              if(spiTxByteIndex < 3)
+                spiTxByteIndexNext = spiTxByteIndex + 1'b1;
+           end
+        end
+      endcase // case (spiTxState)
+   end
 
    logic [$clog2(MAX_BYTES_PER_CS+1)-1:0] w_Master_RX_Count, r_Master_TX_Count = 3'b100;
    SPI_Master_With_Single_CS

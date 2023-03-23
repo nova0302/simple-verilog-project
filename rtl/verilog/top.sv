@@ -20,6 +20,7 @@ module top
     ,input[15:0] lvds_ch3
     );
 
+   wire   cmdUpdate;
    wire [7:0] cmd;
    wire [7:0] addrLsb;
    wire [7:0] addrMsb;
